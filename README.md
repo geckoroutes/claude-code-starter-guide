@@ -1,6 +1,6 @@
 # Claude Code Starter Guide
 
-Turn VS Code into a ChatGPT-like experience that actually writes, runs, and deploys your code. Five steps. No experience needed.
+Turn VS Code into a ChatGPT-like experience that actually writes, runs, and deploys your code.
 
 **What you get:**
 - An AI assistant inside VS Code that you just chat with
@@ -18,6 +18,7 @@ Turn VS Code into a ChatGPT-like experience that actually writes, runs, and depl
 > "Fix the login bug"
 > "Open my browser and check if the site looks right"
 > "Ship my-app"
+> "Review my code for security issues"
 
 ### Permission modes
 
@@ -36,12 +37,9 @@ By default, Claude asks your permission before editing files or running commands
 
 If you trust Claude and don't want to approve every action, turn on bypass mode. This is the closest to a "just do it" ChatGPT experience.
 
-**For one session:** start Claude Code from a terminal with:
-```
-claude --dangerously-skip-permissions
-```
+**Easiest way:** click the **gear icon** (settings wheel) in the Claude Code panel and change the permission mode to **Bypass**.
 
-**Make it the default:** open `~/.claude/settings.json` and add:
+**Or edit the config file:** open `~/.claude/settings.json` and add:
 ```json
 {
   "permissions": {
@@ -50,11 +48,16 @@ claude --dangerously-skip-permissions
 }
 ```
 
+**Or for a single session:** start Claude Code from a terminal with:
+```
+claude --dangerously-skip-permissions
+```
+
 > **Heads up:** Bypass mode lets Claude run any command and edit any file without asking. Only use it if you understand what Claude is doing, or in a test/sandbox environment.
 
 ### Pre-approve specific actions
 
-Instead of full bypass, you can pre-approve just the commands you use often. Add them to `~/.claude/settings.json`:
+Instead of full bypass, you can pre-approve just the commands you use often so Claude won't ask every time. Add them to `~/.claude/settings.json`:
 
 ```json
 {
@@ -68,9 +71,7 @@ Instead of full bypass, you can pre-approve just the commands you use often. Add
 }
 ```
 
-Now Claude won't ask permission for those specific commands but will still ask for everything else.
-
-### Other useful shortcuts
+### Useful shortcuts
 
 | Shortcut | What it does |
 |----------|-------------|
@@ -82,11 +83,62 @@ Now Claude won't ask permission for those specific commands but will still ask f
 
 ---
 
-## Quick Start
+## How it works
+
+```
+You type in Claude chat
+        ↓
+Claude reads your CLAUDE.md files (your preferences + project info)
+        ↓
+Claude uses MCP servers if needed (browser, docs, GitHub)
+        ↓
+Claude applies skills automatically (design, marketing, security)
+        ↓
+Claude writes/edits your code, runs commands, and shows results
+        ↓
+You just chat back and forth until it's done
+```
+
+---
+
+## Project structure
+
+Every project gets its own folder inside your workspace. Claude reads a `CLAUDE.md` file at each level to understand your preferences and the project.
+
+```
+Your workspace (e.g., ~/Projects/)
+│
+├── CLAUDE.md                ← Your global preferences (Claude reads this every session)
+├── _temp/                   ← Scratch space (screenshots, logs)
+│
+├── my-first-app/            ← A project
+│   ├── CLAUDE.md            ← This project's stack, commands, and learnings
+│   └── (your code)
+│
+└── my-second-app/           ← Another project
+    ├── CLAUDE.md
+    └── (your code)
+```
+
+**The global `CLAUDE.md`** tells Claude how you like to work, what projects you have, and where your servers are. The setup script creates this for you.
+
+**Each project's `CLAUDE.md`** tells Claude the tech stack, key commands, and any gotchas specific to that project.
+
+### Adding a new project
+
+1. Create a folder in your workspace: `Projects/my-new-app/`
+2. Tell Claude: "Help me set up a new project here"
+3. Claude will create the `CLAUDE.md` and any boilerplate for you
+
+Or create the `CLAUDE.md` yourself using the template in [templates/project-claude.md](templates/project-claude.md).
+
+---
+
+## Installation
 
 ### Step 1: Install the basics
 
-Download and install these three things (just click, download, run the installer — all default settings):
+Download and install these three things. Just click the link, download, and run the installer with default settings:
 
 | What | Download link | Why you need it |
 |------|--------------|----------------|
@@ -113,7 +165,7 @@ GitHub is where your code lives online. If you already have one, skip this.
 
 ### Step 4: Run the setup script
 
-This script automatically sets up everything else — your workspace, tools, plugins, and skills. It will walk you through each step.
+This script automatically sets up everything else — your workspace, tools, plugins, and skills. It walks you through each step.
 
 **Windows:**
 1. [Download this repo](https://github.com/geckoroutes/claude-code-starter-guide/archive/refs/heads/master.zip) and unzip it
@@ -154,59 +206,6 @@ Nothing is sent anywhere. Everything stays on your machine.
 > "Help me create a new website with Next.js"
 
 That's it. You're set up.
-
----
-
-## How it works (the simple version)
-
-```
-You type in Claude chat
-        ↓
-Claude reads your CLAUDE.md files (your preferences + project info)
-        ↓
-Claude uses MCP servers if needed (browser, docs, GitHub)
-        ↓
-Claude applies skills automatically (design, marketing, security)
-        ↓
-Claude writes/edits your code, runs commands, and shows results
-        ↓
-You just chat back and forth until it's done
-```
-
----
-
-## Project structure
-
-After setup, everything looks like this:
-
-```
-Your workspace (e.g., ~/Projects/)
-│
-├── CLAUDE.md                ← Claude reads this every session
-├── _temp/                   ← Scratch space (screenshots, logs)
-│
-├── my-first-app/            ← Your projects go here
-│   ├── CLAUDE.md            ← Project-specific instructions
-│   └── (your code)
-│
-└── my-second-app/
-    ├── CLAUDE.md
-    └── (your code)
-```
-
-**Each project gets its own folder and its own `CLAUDE.md`.** When you tell Claude "I'm working on my-first-app", it reads that project's instructions and knows the tech stack, commands, and any gotchas.
-
----
-
-## Adding a new project
-
-When you start a new project, just:
-
-1. **Create a folder** in your workspace: `Projects/my-new-app/`
-2. **Tell Claude**: "Help me set up a new project here"
-3. Claude will create the `CLAUDE.md` and any boilerplate for you
-
-Or create the `CLAUDE.md` yourself using the template in [templates/project-claude.md](templates/project-claude.md).
 
 ---
 
