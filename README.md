@@ -10,18 +10,6 @@ Turn VS Code into a ChatGPT-like experience that actually writes, runs, and depl
 
 ---
 
-## How to use
-
-**Just chat.** Type in plain English like you're talking to a coworker. No special commands needed.
-
-> "Help me build a landing page"
-> "Fix the login bug"
-> "Open my browser and check if the site looks right"
-> "Ship my-app"
-> "Review my code for security issues"
-
----
-
 ## How it works
 
 ```
@@ -128,10 +116,16 @@ Nothing is sent anywhere. Everything stays on your machine.
 
 1. Open VS Code
 2. **File → Open Folder** → pick your workspace folder (the script told you where it is)
-3. Click the **Claude icon** in the left sidebar and sign in
-4. Type something like:
+3. Open a file, then click the **Claude icon** in the top right of the editor
+4. Sign in with your Claude account
 
-> "Help me create a new website with Next.js"
+**Just chat.** Type in plain English like you're talking to a coworker. No special commands needed.
+
+> "Help me build a landing page"
+> "Fix the login bug"
+> "Open my browser and check if the site looks right"
+> "Ship my-app"
+> "Review my code for security issues"
 
 That's it. You're set up.
 
@@ -174,7 +168,8 @@ The setup script enables bypass mode by default (Claude just works). If you ever
 
 ---
 
-## Troubleshooting
+<details>
+<summary><strong>Troubleshooting</strong></summary>
 
 | Problem | Fix |
 |---------|-----|
@@ -183,6 +178,8 @@ The setup script enables bypass mode by default (Claude just works). If you ever
 | "Claude doesn't know my preferences" | Make sure your `CLAUDE.md` is in the workspace root folder that you opened in VS Code |
 | "The setup script won't run" (Windows) | Right-click the script → Properties → check "Unblock" → OK, then try again |
 | "Permission denied" (Mac/Linux) | Run: `chmod +x setup-mac.sh` then try again |
+
+</details>
 
 ---
 
