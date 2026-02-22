@@ -20,39 +20,6 @@ Turn VS Code into a ChatGPT-like experience that actually writes, runs, and depl
 > "Ship my-app"
 > "Review my code for security issues"
 
-### Permission modes
-
-By default, Claude asks your permission before editing files or running commands. You can change this:
-
-| Mode | What it does | How to activate |
-|------|-------------|----------------|
-| **Normal** | Asks permission for each action (default) | This is the default |
-| **Accept Edits** | Auto-approves file edits, still asks for commands | Press **Shift+Tab** once |
-| **Plan Mode** | Read-only — Claude can look but not touch (good for exploring) | Press **Shift+Tab** twice, or type `/plan` |
-| **Bypass (YOLO)** | Skips ALL permission prompts — Claude just does everything | See below |
-
-**To switch modes during a chat:** press **Shift+Tab** to cycle through them.
-
-### Bypass mode (let Claude work without asking)
-
-If you trust Claude and don't want to approve every action, turn on bypass mode. This is the closest to a "just do it" ChatGPT experience.
-
-1. Open VS Code Settings: **Ctrl+,** (Windows/Linux) or **Cmd+,** (Mac)
-2. Search for `claude`
-3. Check **"Claude Code: Allow Dangerously Skip Permissions"**
-
-That's it — Claude will now work without asking permission.
-
-### Useful shortcuts
-
-| Shortcut | What it does |
-|----------|-------------|
-| **Shift+Tab** | Cycle through permission modes |
-| **Escape** | Cancel Claude's current response |
-| `/plan` | Enter plan mode (read-only analysis) |
-| `/permissions` | See and manage all current permission rules |
-| `/compact` | Compress conversation to free up context space |
-
 ---
 
 ## How it works
@@ -135,7 +102,17 @@ GitHub is where your code lives online. If you already have one, skip this.
 3. Install the Claude Code extension in VS Code: **[Click here to install](https://marketplace.visualstudio.com/items?itemName=anthropics.claude-code)**
 4. In VS Code, click the **Claude icon** in the left sidebar and sign in
 
-### Step 4: Run the setup script
+### Step 4: Turn on bypass mode (recommended)
+
+By default, Claude asks your permission before every action. Turn this off so Claude just works — like ChatGPT.
+
+1. Open VS Code Settings: **Ctrl+,** (Windows/Linux) or **Cmd+,** (Mac)
+2. Search for `claude`
+3. Check **"Claude Code: Allow Dangerously Skip Permissions"**
+
+That's it — Claude will now work without asking permission.
+
+### Step 5: Run the setup script
 
 This script automatically sets up everything else — your workspace, tools, plugins, and skills. It walks you through each step.
 
@@ -168,7 +145,7 @@ Nothing is sent anywhere. Everything stays on your machine.
 
 </details>
 
-### Step 5: Start chatting
+### Step 6: Start chatting
 
 1. Open VS Code
 2. **File → Open Folder** → pick your workspace folder (the script told you where it is)
