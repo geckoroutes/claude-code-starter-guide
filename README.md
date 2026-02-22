@@ -159,6 +159,43 @@ The setup script enables bypass mode by default (Claude just works). If you ever
 
 ---
 
+## Example workflows
+
+### Build an app from an idea
+
+1. Create a new folder in your workspace, e.g. `Projects/meal-planner/`
+2. Switch to **Plan Mode** (press **Shift+Tab** twice) — this lets Claude research and think without changing any files
+3. Send something like:
+
+> I have an idea for a meal planning app that generates grocery lists based on your dietary restrictions. Do extended market research. Check if people experience this problem, if there are already apps solving this, what users complain about, market size, etc. Then come up with a business plan.
+
+4. Claude will research, analyze competitors, and draft a plan. Chat back and forth — ask it to go deeper on certain aspects, propose changes, refine the plan.
+5. Once you're happy with the plan, switch to **Bypass mode** (press **Shift+Tab** until you see Bypass) and say:
+
+> Execute this plan. Start building.
+
+**Tip:** Before step 5, type `/compact` first. This compresses the conversation so Claude starts building with a fresh context. Wait for it to finish (can take 30-120 seconds), then paste the final plan into the chat and tell Claude to execute it.
+
+### Fix a bug in an existing project
+
+1. Copy your project folder into your workspace
+2. Tell Claude:
+
+> There's a bug where users can't log in after resetting their password. Find the issue and fix it.
+
+Claude will read your code, trace the bug, and fix it.
+
+### Improve an existing website
+
+1. Copy your site folder into your workspace (WordPress, HTML, React — anything)
+2. Tell Claude:
+
+> Review this website. Check the design, performance, SEO, and accessibility. Then fix everything you find.
+
+Claude will open your site in the browser, audit it, and make the changes.
+
+---
+
 <details>
 <summary><strong>Troubleshooting</strong></summary>
 
