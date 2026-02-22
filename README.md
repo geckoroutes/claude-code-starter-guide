@@ -55,22 +55,19 @@ Your workspace (e.g., ~/Projects/)
 
 ## Installation
 
-### Step 1: Get a GitHub account
+### Step 1: Create your accounts
 
-GitHub is where your code lives online. If you already have one, skip this.
-
+**GitHub** — where your code lives online. Skip if you already have one.
 1. Go to **[github.com/signup](https://github.com/signup)**
-2. Create an account with your email
-3. Verify your email
+2. Create an account and verify your email
 
-### Step 2: Get Claude
-
+**Claude** — the AI that powers everything.
 1. Go to **[claude.ai](https://claude.ai/)** and create an account
 2. Go to **[claude.ai/upgrade](https://claude.ai/upgrade)** and pick a plan:
    - **Pro** ($20/month) — good to start
    - **Max** ($100/month) — for heavy daily use
 
-### Step 3: Run the setup script
+### Step 2: Run the setup script
 
 This script installs everything automatically — VS Code, Node.js, Git, the Claude Code extension, your workspace, tools, plugins, and skills. It walks you through each step.
 
@@ -94,7 +91,7 @@ This script installs everything automatically — VS Code, Node.js, Git, the Cla
 - Installs the Claude Code extension
 - Creates your workspace folder (default: `~/Projects`)
 - Creates a `CLAUDE.md` file — Claude reads this every session to know your preferences
-- Asks for your GitHub token and saves it securely
+- Connects your GitHub account (walks you through creating a token so Claude can manage your repos)
 - Sets up 3 MCP servers (browser control, live docs, GitHub integration)
 - Installs 5 skills (deploy workflow, design principles, marketing copy, psychology, security)
 - Installs 3 plugins (TypeScript intelligence, code review, UI design)
@@ -104,7 +101,7 @@ Nothing is sent anywhere. Everything stays on your machine.
 
 </details>
 
-### Step 4: Start chatting
+### Step 3: Start chatting
 
 1. Open VS Code
 2. **File → Open Folder** → pick your workspace folder (the script told you where it is)
