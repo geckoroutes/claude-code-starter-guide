@@ -10,6 +10,78 @@ Turn VS Code into a ChatGPT-like experience that actually writes, runs, and depl
 
 ---
 
+## How to use
+
+**Just chat.** Type in plain English like you're talking to a coworker. No special commands needed.
+
+> "Help me build a landing page"
+> "Fix the login bug"
+> "Open my browser and check if the site looks right"
+> "Ship my-app"
+
+### Permission modes
+
+By default, Claude asks your permission before editing files or running commands. You can change this:
+
+| Mode | What it does | How to activate |
+|------|-------------|----------------|
+| **Normal** | Asks permission for each action (default) | This is the default |
+| **Accept Edits** | Auto-approves file edits, still asks for commands | Press **Shift+Tab** once |
+| **Plan Mode** | Read-only — Claude can look but not touch (good for exploring) | Press **Shift+Tab** twice, or type `/plan` |
+| **Bypass (YOLO)** | Skips ALL permission prompts — Claude just does everything | See below |
+
+**To switch modes during a chat:** press **Shift+Tab** to cycle through them.
+
+### Bypass mode (let Claude work without asking)
+
+If you trust Claude and don't want to approve every action, turn on bypass mode. This is the closest to a "just do it" ChatGPT experience.
+
+**For one session:** start Claude Code from a terminal with:
+```
+claude --dangerously-skip-permissions
+```
+
+**Make it the default:** open `~/.claude/settings.json` and add:
+```json
+{
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  }
+}
+```
+
+> **Heads up:** Bypass mode lets Claude run any command and edit any file without asking. Only use it if you understand what Claude is doing, or in a test/sandbox environment.
+
+### Pre-approve specific actions
+
+Instead of full bypass, you can pre-approve just the commands you use often. Add them to `~/.claude/settings.json`:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
+    ]
+  }
+}
+```
+
+Now Claude won't ask permission for those specific commands but will still ask for everything else.
+
+### Other useful shortcuts
+
+| Shortcut | What it does |
+|----------|-------------|
+| **Shift+Tab** | Cycle through permission modes |
+| **Escape** | Cancel Claude's current response |
+| `/plan` | Enter plan mode (read-only analysis) |
+| `/permissions` | See and manage all current permission rules |
+| `/compact` | Compress conversation to free up context space |
+
+---
+
 ## Quick Start
 
 ### Step 1: Install the basics
@@ -82,21 +154,6 @@ Nothing is sent anywhere. Everything stays on your machine.
 > "Help me create a new website with Next.js"
 
 That's it. You're set up.
-
----
-
-## What can you do now?
-
-Here are some things to try. Just type these in the Claude chat:
-
-| What to say | What happens |
-|------------|-------------|
-| "Help me create a React app" | Claude creates a full project for you |
-| "Open my browser and go to localhost:3000" | Claude controls your Chrome browser |
-| "Review my code for security issues" | Claude does a multi-angle code review |
-| "How does the new Next.js cache work?" | Claude looks up the latest docs (not outdated training data) |
-| "Create a PR for these changes" | Claude creates a GitHub pull request |
-| "Build me a landing page for a SaaS product" | Claude applies design + marketing + psychology knowledge |
 
 ---
 
@@ -184,16 +241,6 @@ Skills are like cheat sheets that Claude reads automatically when relevant:
 | **marketing-copy** | When writing landing pages or CTAs — uses proven copywriting frameworks |
 | **behavioral-psychology** | When designing features — applies habit formation and persuasion principles |
 | **soc2-compliance** | When handling user data — applies security patterns and audit logging |
-
----
-
-## Tips
-
-- **Just chat naturally.** You don't need special commands. Talk to Claude like you'd talk to a coworker.
-- **Claude learns from mistakes.** It automatically records gotchas in your CLAUDE.md files so the same mistake doesn't happen twice.
-- **One project = one folder.** Don't mix projects. Each folder gets its own `CLAUDE.md`.
-- **Never paste passwords or tokens in the chat.** Use `.env` files instead (the setup script showed you how).
-- **Say "ship [project-name]"** to deploy. Claude reads the deploy skill and handles everything.
 
 ---
 
