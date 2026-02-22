@@ -102,17 +102,7 @@ GitHub is where your code lives online. If you already have one, skip this.
 3. Install the Claude Code extension in VS Code: **[Click here to install](https://marketplace.visualstudio.com/items?itemName=anthropics.claude-code)**
 4. In VS Code, click the **Claude icon** in the left sidebar and sign in
 
-### Step 4: Turn on bypass mode (recommended)
-
-By default, Claude asks your permission before every action. Turn this off so Claude just works — like ChatGPT.
-
-1. Open VS Code Settings: **Ctrl+,** (Windows/Linux) or **Cmd+,** (Mac)
-2. Search for `claude`
-3. Check **"Claude Code: Allow Dangerously Skip Permissions"**
-
-That's it — Claude will now work without asking permission.
-
-### Step 5: Run the setup script
+### Step 4: Run the setup script
 
 This script automatically sets up everything else — your workspace, tools, plugins, and skills. It walks you through each step.
 
@@ -140,12 +130,13 @@ This script automatically sets up everything else — your workspace, tools, plu
 - Sets up 3 MCP servers (browser control, live docs, GitHub integration)
 - Installs 5 skills (deploy workflow, design principles, marketing copy, psychology, security)
 - Installs 3 plugins (TypeScript intelligence, code review, UI design)
+- Enables bypass mode (Claude works without asking permission)
 
 Nothing is sent anywhere. Everything stays on your machine.
 
 </details>
 
-### Step 6: Start chatting
+### Step 5: Start chatting
 
 1. Open VS Code
 2. **File → Open Folder** → pick your workspace folder (the script told you where it is)
@@ -164,31 +155,34 @@ That's it. You're set up.
 
 These let Claude interact with the outside world during your conversation:
 
-| Server | What it does |
-|--------|-------------|
-| **browsermcp** | Claude can control your Chrome browser — click buttons, fill forms, take screenshots, navigate pages |
-| **context7** | Claude gets up-to-date documentation for popular libraries (React, Next.js, Tailwind, etc.) instead of relying on training data |
-| **github** | Claude can create pull requests, manage issues, and review code on GitHub |
+- **browsermcp** — Claude can control your Chrome browser — click buttons, fill forms, take screenshots, navigate pages
+- **context7** — Claude gets up-to-date documentation for popular libraries (React, Next.js, Tailwind, etc.) instead of relying on training data
+- **github** — Claude can create pull requests, manage issues, and review code on GitHub
 
 ### Plugins (Claude's tools)
 
-| Plugin | What it does |
-|--------|-------------|
-| **typescript-lsp** | Gives Claude IDE-like intelligence — go-to-definition, find references, real error diagnostics |
-| **code-review** | Automated code review that checks security, performance, and readability |
-| **frontend-design** | Helps Claude generate better UI with design system awareness |
+- **typescript-lsp** — gives Claude IDE-like intelligence — go-to-definition, find references, real error diagnostics
+- **code-review** — automated code review that checks security, performance, and readability
+- **frontend-design** — helps Claude generate better UI with design system awareness
 
 ### Skills (Claude's knowledge)
 
 Skills are like cheat sheets that Claude reads automatically when relevant:
 
-| Skill | When Claude uses it |
-|-------|-------------------|
-| **deploy** | When you say "ship my-app" or "push to live" — handles the full deployment workflow |
-| **design-principles** | When building any UI — applies typography, color, spacing, and accessibility rules |
-| **marketing-copy** | When writing landing pages or CTAs — uses proven copywriting frameworks |
-| **behavioral-psychology** | When designing features — applies habit formation and persuasion principles |
-| **soc2-compliance** | When handling user data — applies security patterns and audit logging |
+- **deploy** — when you say "ship my-app" or "push to live" — handles the full deployment workflow
+- **design-principles** — when building any UI — applies typography, color, spacing, and accessibility rules
+- **marketing-copy** — when writing landing pages or CTAs — uses proven copywriting frameworks
+- **behavioral-psychology** — when designing features — applies habit formation and persuasion principles
+- **soc2-compliance** — when handling user data — applies security patterns and audit logging
+
+### Permission modes
+
+The setup script enables bypass mode by default (Claude just works). If you ever want to change this:
+
+- **Bypass (default)** — Claude does everything without asking. The closest to a ChatGPT experience.
+- **Normal** — Claude asks permission before each action. Good if you want to review everything.
+- **Accept Edits** — Claude auto-edits files but still asks before running commands. Press **Shift+Tab** to activate.
+- **Plan Mode** — Read-only. Claude can look at your code but won't change anything. Type `/plan` to activate.
 
 ---
 

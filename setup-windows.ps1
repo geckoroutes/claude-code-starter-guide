@@ -46,7 +46,7 @@ Write-Host ""
 # Step 1: Check prerequisites
 # =============================================================================
 
-Write-Step "1/6" "Checking prerequisites..."
+Write-Step "1/7" "Checking prerequisites..."
 
 # Check Node.js
 $nodeVersion = $null
@@ -99,7 +99,7 @@ if ($codePath) {
 # Step 2: Workspace
 # =============================================================================
 
-Write-Step "2/6" "Setting up workspace..."
+Write-Step "2/7" "Setting up workspace..."
 
 $defaultWorkspace = Join-Path $env:USERPROFILE "Projects"
 
@@ -177,7 +177,7 @@ When something goes wrong or you discover a gotcha:
 # Step 3: GitHub token
 # =============================================================================
 
-Write-Step "3/6" "Setting up secrets..."
+Write-Step "3/7" "Setting up secrets..."
 
 $claudeDir = Join-Path $env:USERPROFILE ".claude"
 if (-not (Test-Path $claudeDir)) {
@@ -231,7 +231,7 @@ if (-not $hasToken) {
 # Step 4: MCP Servers
 # =============================================================================
 
-Write-Step "4/6" "Setting up MCP servers..."
+Write-Step "4/7" "Setting up MCP servers..."
 
 $mcpFile = Join-Path $claudeDir ".mcp.json"
 $mcpConfig = @'
@@ -270,7 +270,7 @@ if (-not (Test-Path $mcpFile)) {
 # Step 5: Skills
 # =============================================================================
 
-Write-Step "5/6" "Installing skills..."
+Write-Step "5/7" "Installing skills..."
 
 $skillsDir = Join-Path $claudeDir "skills"
 
@@ -322,7 +322,7 @@ if (-not (Test-Path $deployFile)) {
 # Step 6: Plugins
 # =============================================================================
 
-Write-Step "6/6" "Installing plugins..."
+Write-Step "6/7" "Installing plugins..."
 
 $claudeCmd = Get-Command claude -ErrorAction SilentlyContinue
 if ($claudeCmd) {
@@ -360,6 +360,44 @@ if ($claudeCmd) {
 }
 
 # =============================================================================
+# Step 7: VS Code bypass mode
+# =============================================================================
+
+Write-Step "7/7" "Enabling bypass mode..."
+
+$vscodeSettingsDir = Join-Path $env:APPDATA "Code\User"
+$vscodeSettingsFile = Join-Path $vscodeSettingsDir "settings.json"
+
+if (Test-Path $vscodeSettingsFile) {
+    $settings = Get-Content $vscodeSettingsFile -Raw
+    if ($settings -match "allowDangerouslySkipPermissions") {
+        Write-Success "Bypass mode already configured"
+    } else {
+        # Insert the setting before the last closing brace
+        $settings = $settings.TrimEnd()
+        if ($settings.EndsWith("}")) {
+            $settings = $settings.Substring(0, $settings.Length - 1).TrimEnd()
+            if ($settings.EndsWith(",")) {
+                $settings = $settings + "`n    `"claudeCode.allowDangerouslySkipPermissions`": true`n}"
+            } else {
+                $settings = $settings + ",`n    `"claudeCode.allowDangerouslySkipPermissions`": true`n}"
+            }
+            Set-Content -Path $vscodeSettingsFile -Value $settings -Encoding UTF8
+            Write-Success "Bypass mode enabled — Claude will work without asking permission"
+        } else {
+            Write-Info "Could not parse settings.json — enable bypass manually in VS Code settings"
+        }
+    }
+} else {
+    # Create settings file with just this setting
+    if (-not (Test-Path $vscodeSettingsDir)) {
+        New-Item -ItemType Directory -Path $vscodeSettingsDir -Force | Out-Null
+    }
+    Set-Content -Path $vscodeSettingsFile -Value "{`n    `"claudeCode.allowDangerouslySkipPermissions`": true`n}" -Encoding UTF8
+    Write-Success "Bypass mode enabled — Claude will work without asking permission"
+}
+
+# =============================================================================
 # Done!
 # =============================================================================
 
@@ -374,6 +412,7 @@ Write-Host "    [OK] Workspace at $workspace" -ForegroundColor Green
 Write-Host "    [OK] CLAUDE.md (global instructions)" -ForegroundColor Green
 Write-Host "    [OK] MCP servers (browser, docs, GitHub)" -ForegroundColor Green
 Write-Host "    [OK] Skills (design, psychology, marketing, security, deploy)" -ForegroundColor Green
+Write-Host "    [OK] Bypass mode (Claude works without asking permission)" -ForegroundColor Green
 Write-Host ""
 Write-Host "  Next steps:" -ForegroundColor White
 Write-Host "    1. Open VS Code" -ForegroundColor Yellow

@@ -42,7 +42,7 @@ echo ""
 # Step 1: Check prerequisites
 # =============================================================================
 
-step "1/6" "Checking prerequisites..."
+step "1/7" "Checking prerequisites..."
 
 # Check Node.js
 if command -v node &> /dev/null; then
@@ -87,7 +87,7 @@ fi
 # Step 2: Workspace
 # =============================================================================
 
-step "2/6" "Setting up workspace..."
+step "2/7" "Setting up workspace..."
 
 DEFAULT_WORKSPACE="$HOME/Projects"
 
@@ -153,7 +153,7 @@ fi
 # Step 3: GitHub token
 # =============================================================================
 
-step "3/6" "Setting up secrets..."
+step "3/7" "Setting up secrets..."
 
 CLAUDE_DIR="$HOME/.claude"
 mkdir -p "$CLAUDE_DIR"
@@ -200,7 +200,7 @@ fi
 # Step 4: MCP Servers
 # =============================================================================
 
-step "4/6" "Setting up MCP servers..."
+step "4/7" "Setting up MCP servers..."
 
 MCP_FILE="$CLAUDE_DIR/.mcp.json"
 if [ ! -f "$MCP_FILE" ]; then
@@ -237,7 +237,7 @@ fi
 # Step 5: Skills
 # =============================================================================
 
-step "5/6" "Installing skills..."
+step "5/7" "Installing skills..."
 
 SKILLS_DIR="$CLAUDE_DIR/skills"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -270,7 +270,7 @@ fi
 # Step 6: Plugins
 # =============================================================================
 
-step "6/6" "Installing plugins..."
+step "6/7" "Installing plugins..."
 
 if command -v claude &> /dev/null; then
     info "Installing plugin marketplace..."
@@ -292,6 +292,45 @@ else
 fi
 
 # =============================================================================
+# Step 7: VS Code bypass mode
+# =============================================================================
+
+step "7/7" "Enabling bypass mode..."
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    VSCODE_SETTINGS_DIR="$HOME/Library/Application Support/Code/User"
+else
+    VSCODE_SETTINGS_DIR="$HOME/.config/Code/User"
+fi
+VSCODE_SETTINGS_FILE="$VSCODE_SETTINGS_DIR/settings.json"
+
+if [ -f "$VSCODE_SETTINGS_FILE" ]; then
+    if grep -q "allowDangerouslySkipPermissions" "$VSCODE_SETTINGS_FILE"; then
+        ok "Bypass mode already configured"
+    else
+        # Use python/node to safely merge JSON, fallback to manual
+        if command -v node &> /dev/null; then
+            node -e "
+const fs = require('fs');
+const f = '$VSCODE_SETTINGS_FILE';
+const s = JSON.parse(fs.readFileSync(f, 'utf8'));
+s['claudeCode.allowDangerouslySkipPermissions'] = true;
+fs.writeFileSync(f, JSON.stringify(s, null, 4));
+"
+            ok "Bypass mode enabled — Claude will work without asking permission"
+        else
+            info "Could not update settings.json — enable bypass manually in VS Code settings"
+        fi
+    fi
+else
+    mkdir -p "$VSCODE_SETTINGS_DIR"
+    echo '{
+    "claudeCode.allowDangerouslySkipPermissions": true
+}' > "$VSCODE_SETTINGS_FILE"
+    ok "Bypass mode enabled — Claude will work without asking permission"
+fi
+
+# =============================================================================
 # Done!
 # =============================================================================
 
@@ -306,6 +345,7 @@ echo -e "  ${GREEN}  [OK] Workspace at $WORKSPACE${NC}"
 echo -e "  ${GREEN}  [OK] CLAUDE.md (global instructions)${NC}"
 echo -e "  ${GREEN}  [OK] MCP servers (browser, docs, GitHub)${NC}"
 echo -e "  ${GREEN}  [OK] Skills (design, psychology, marketing, security, deploy)${NC}"
+echo -e "  ${GREEN}  [OK] Bypass mode (Claude works without asking permission)${NC}"
 echo ""
 echo -e "  Next steps:"
 echo -e "  ${YELLOW}  1. Open VS Code${NC}"
