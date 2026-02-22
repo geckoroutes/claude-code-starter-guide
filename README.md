@@ -51,18 +51,6 @@ Your workspace (e.g., ~/Projects/)
 
 **Each project's `CLAUDE.md`** tells Claude the tech stack, key commands, and any gotchas specific to that project.
 
-### Adding a project
-
-**Start from scratch:**
-1. Tell Claude: "Create a new Next.js project called my-app"
-2. Claude creates the folder, installs dependencies, and sets up the `CLAUDE.md` for you
-
-**Use an existing project:**
-1. Copy or move your project folder into your workspace (e.g. a WordPress site, a React app, a Python script — any folder with code)
-2. Tell Claude: "Set up this project" — Claude will read your code, figure out the stack, and create a `CLAUDE.md`
-
-You can also create the `CLAUDE.md` yourself using the template in [templates/project-claude.md](templates/project-claude.md).
-
 ---
 
 ## Installation
@@ -200,7 +188,7 @@ claude-code-starter-guide/
 │   ├── CLAUDE.md                          ← Global workspace template
 │   ├── project-claude.md                  ← Per-project template
 │   ├── .mcp.json                          ← MCP server config
-│   ├── .env.example                       ← Secrets file format
+│   ├── .env                               ← Secrets file (with placeholders)
 │   └── deploy-skill.md                    ← Deploy skill template
 └── skills/
     ├── design-principles/SKILL.md

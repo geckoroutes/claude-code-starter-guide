@@ -1,5 +1,6 @@
-.env
 .env.local
+# Ignore .env at root, but allow templates/.env (has placeholders only)
+/.env
 node_modules/
 .DS_Store
 Thumbs.db
