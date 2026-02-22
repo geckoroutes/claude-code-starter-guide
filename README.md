@@ -194,6 +194,30 @@ Claude will read your code, trace the bug, and fix it.
 
 Claude will open your site in the browser, audit it, and make the changes.
 
+### Analyze your business
+
+1. Tell Claude:
+
+> Go to www.mybusiness.com. Analyze the entire site — the product, positioning, copy, design, and customer experience. Then tell me: if you were running this business, what would be your top 5 priority actions?
+
+Claude will browse your site, analyze everything, and come back with actionable priorities.
+
+### Organize your life with Notion
+
+1. Tell Claude:
+
+> Open my Notion workspace at notion.so. Go through my pages, tasks, and notes. Analyze how I organize things, then give me specific tips on how to improve my productivity system — what to consolidate, what to automate, and what I'm overcomplicating.
+
+Claude will browse through your Notion, understand your setup, and suggest improvements.
+
+### Automate tasks in ClickUp
+
+1. Tell Claude:
+
+> Open my ClickUp workspace. Scan through my projects and tasks. Identify repetitive work, bottlenecks, and things that could be automated. Then create a plan to streamline my workflow.
+
+Claude will analyze your project management setup and find automation opportunities.
+
 ---
 
 <details>
