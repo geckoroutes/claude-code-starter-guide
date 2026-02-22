@@ -51,13 +51,17 @@ Your workspace (e.g., ~/Projects/)
 
 **Each project's `CLAUDE.md`** tells Claude the tech stack, key commands, and any gotchas specific to that project.
 
-### Adding a new project
+### Adding a project
 
-1. Create a folder in your workspace: `Projects/my-new-app/`
-2. Tell Claude: "Help me set up a new project here"
-3. Claude will create the `CLAUDE.md` and any boilerplate for you
+**Start from scratch:**
+1. Tell Claude: "Create a new Next.js project called my-app"
+2. Claude creates the folder, installs dependencies, and sets up the `CLAUDE.md` for you
 
-Or create the `CLAUDE.md` yourself using the template in [templates/project-claude.md](templates/project-claude.md).
+**Use an existing project:**
+1. Copy or move your project folder into your workspace (e.g. a WordPress site, a React app, a Python script — any folder with code)
+2. Tell Claude: "Set up this project" — Claude will read your code, figure out the stack, and create a `CLAUDE.md`
+
+You can also create the `CLAUDE.md` yourself using the template in [templates/project-claude.md](templates/project-claude.md).
 
 ---
 
@@ -121,11 +125,13 @@ Nothing is sent anywhere. Everything stays on your machine.
 
 **Just chat.** Type in plain English like you're talking to a coworker. No special commands needed.
 
+> "Create a new Next.js project called my-app"
 > "Help me build a landing page"
 > "Fix the login bug"
 > "Open my browser and check if the site looks right"
 > "Ship my-app"
-> "Review my code for security issues"
+
+**Already have a project?** Copy the folder into your workspace, then tell Claude: "Set up this project". It will read your code and figure everything out.
 
 That's it. You're set up.
 
