@@ -75,17 +75,7 @@ Or create the `CLAUDE.md` yourself using the template in [templates/project-clau
 
 ## Installation
 
-### Step 1: Install the basics
-
-Download and install these three things. Just click the link, download, and run the installer with default settings:
-
-| What | Download link | Why you need it |
-|------|--------------|----------------|
-| **VS Code** | [Download VS Code](https://code.visualstudio.com/download) | This is where you'll chat with Claude |
-| **Node.js** | [Download Node.js](https://nodejs.org/) (click the **LTS** button) | Needed to run some of Claude's tools |
-| **Git** | [Download Git](https://git-scm.com/downloads) | Tracks your code changes |
-
-### Step 2: Get a GitHub account
+### Step 1: Get a GitHub account
 
 GitHub is where your code lives online. If you already have one, skip this.
 
@@ -93,18 +83,16 @@ GitHub is where your code lives online. If you already have one, skip this.
 2. Create an account with your email
 3. Verify your email
 
-### Step 3: Get Claude
+### Step 2: Get Claude
 
 1. Go to **[claude.ai](https://claude.ai/)** and create an account
 2. Go to **[claude.ai/upgrade](https://claude.ai/upgrade)** and pick a plan:
    - **Pro** ($20/month) — good to start
    - **Max** ($100/month) — for heavy daily use
-3. Install the Claude Code extension in VS Code: **[Click here to install](https://marketplace.visualstudio.com/items?itemName=anthropics.claude-code)**
-4. In VS Code, click the **Claude icon** in the left sidebar and sign in
 
-### Step 4: Run the setup script
+### Step 3: Run the setup script
 
-This script automatically sets up everything else — your workspace, tools, plugins, and skills. It walks you through each step.
+This script installs everything automatically — VS Code, Node.js, Git, the Claude Code extension, your workspace, tools, plugins, and skills. It walks you through each step.
 
 **Windows:**
 1. [Download this repo](https://github.com/geckoroutes/claude-code-starter-guide/archive/refs/heads/master.zip) and unzip it
@@ -115,15 +103,15 @@ This script automatically sets up everything else — your workspace, tools, plu
 1. Open Terminal (search "Terminal" in Spotlight or your app menu)
 2. Run these two lines:
    ```
-   git clone https://github.com/geckoroutes/claude-code-starter-guide.git
-   bash claude-code-starter-guide/setup-mac.sh
+   curl -fsSL https://raw.githubusercontent.com/geckoroutes/claude-code-starter-guide/master/setup-mac.sh -o setup-mac.sh && bash setup-mac.sh
    ```
 3. Follow the prompts
 
 <details>
 <summary>What does the script do?</summary>
 
-- Checks that VS Code, Node.js, and Git are installed
+- Installs VS Code, Node.js, and Git (if not already installed)
+- Installs the Claude Code extension
 - Creates your workspace folder (default: `~/Projects`)
 - Creates a `CLAUDE.md` file — Claude reads this every session to know your preferences
 - Asks for your GitHub token and saves it securely
@@ -136,11 +124,11 @@ Nothing is sent anywhere. Everything stays on your machine.
 
 </details>
 
-### Step 5: Start chatting
+### Step 4: Start chatting
 
 1. Open VS Code
 2. **File → Open Folder** → pick your workspace folder (the script told you where it is)
-3. Click the **Claude icon** in the left sidebar
+3. Click the **Claude icon** in the left sidebar and sign in
 4. Type something like:
 
 > "Help me create a new website with Next.js"

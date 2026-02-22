@@ -31,7 +31,9 @@ echo -e "  ${CYAN}============================================${NC}"
 echo -e "  ${CYAN}  Claude Code Setup${NC}"
 echo -e "  ${CYAN}============================================${NC}"
 echo ""
-echo -e "  This will set up your Claude Code environment:"
+echo -e "  This will install and set up everything you need:"
+echo -e "  ${GRAY}  - VS Code, Node.js, Git (if not installed)${NC}"
+echo -e "  ${GRAY}  - Claude Code extension${NC}"
 echo -e "  ${GRAY}  - MCP servers (browser control, docs, GitHub)${NC}"
 echo -e "  ${GRAY}  - Plugins (code review, TypeScript, design)${NC}"
 echo -e "  ${GRAY}  - Skills (deploy, design, marketing, security)${NC}"
@@ -39,55 +41,147 @@ echo -e "  ${GRAY}  - Workspace structure${NC}"
 echo ""
 
 # =============================================================================
-# Step 1: Check prerequisites
+# Step 1: Install prerequisites
 # =============================================================================
 
-step "1/7" "Checking prerequisites..."
+step "1/8" "Installing prerequisites..."
 
-# Check Node.js
+# Detect package manager
+HAS_BREW=false
+if command -v brew &> /dev/null; then
+    HAS_BREW=true
+fi
+
+IS_MAC=false
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    IS_MAC=true
+fi
+
+IS_LINUX=false
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    IS_LINUX=true
+fi
+
+# Install Homebrew on Mac if missing (needed for auto-installs)
+if [ "$IS_MAC" = true ] && [ "$HAS_BREW" = false ]; then
+    info "Installing Homebrew (Mac package manager)..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    # Add brew to PATH for this session
+    if [ -f /opt/homebrew/bin/brew ]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [ -f /usr/local/bin/brew ]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+    fi
+    HAS_BREW=true
+    ok "Homebrew installed"
+fi
+
+# --- Node.js ---
 if command -v node &> /dev/null; then
     ok "Node.js found: $(node --version)"
 else
-    info "Node.js not found."
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        info "Opening nodejs.org — download and install the LTS version."
-        open "https://nodejs.org/"
+    if [ "$HAS_BREW" = true ]; then
+        info "Installing Node.js via Homebrew..."
+        brew install node 2>/dev/null
+    elif [ "$IS_LINUX" = true ]; then
+        info "Installing Node.js..."
+        curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - 2>/dev/null
+        sudo apt-get install -y nodejs 2>/dev/null
+    fi
+
+    if command -v node &> /dev/null; then
+        ok "Node.js installed: $(node --version)"
     else
-        info "Install Node.js: https://nodejs.org/"
-        info "Or run: curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - && sudo apt-get install -y nodejs"
+        if [ "$IS_MAC" = true ]; then
+            info "Opening nodejs.org — download and install the LTS version."
+            open "https://nodejs.org/"
+        else
+            info "Install Node.js: https://nodejs.org/"
+        fi
+        read -p "  Press Enter after installing Node.js to continue..."
+        if ! command -v node &> /dev/null; then
+            err "Node.js still not found. Please install it and run this script again."
+            exit 1
+        fi
+        ok "Node.js found: $(node --version)"
     fi
-    read -p "  Press Enter after installing Node.js to continue..."
-    if ! command -v node &> /dev/null; then
-        err "Node.js still not found. Please install it and run this script again."
-        exit 1
-    fi
-    ok "Node.js found: $(node --version)"
 fi
 
-# Check Git
+# --- Git ---
 if command -v git &> /dev/null; then
     ok "Git found: $(git --version)"
 else
-    info "Git not found."
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        info "Installing via Xcode Command Line Tools..."
+    if [ "$IS_MAC" = true ]; then
+        info "Installing Git via Xcode Command Line Tools..."
         xcode-select --install 2>/dev/null || true
         read -p "  Press Enter after the installer finishes..."
-    else
-        info "Install Git: sudo apt-get install git"
+    elif [ "$IS_LINUX" = true ]; then
+        info "Installing Git..."
+        sudo apt-get install -y git 2>/dev/null
     fi
-    if ! command -v git &> /dev/null; then
+
+    if command -v git &> /dev/null; then
+        ok "Git installed: $(git --version)"
+    else
         err "Git still not found. Please install it and run this script again."
         exit 1
     fi
-    ok "Git found: $(git --version)"
+fi
+
+# --- VS Code ---
+if command -v code &> /dev/null; then
+    ok "VS Code found"
+else
+    if [ "$HAS_BREW" = true ]; then
+        info "Installing VS Code via Homebrew..."
+        brew install --cask visual-studio-code 2>/dev/null
+    elif [ "$IS_LINUX" = true ]; then
+        info "Installing VS Code via snap..."
+        sudo snap install code --classic 2>/dev/null || true
+    fi
+
+    if command -v code &> /dev/null; then
+        ok "VS Code installed"
+    else
+        if [ "$IS_MAC" = true ]; then
+            info "Opening VS Code download page..."
+            open "https://code.visualstudio.com/download"
+        else
+            info "Download VS Code: https://code.visualstudio.com/download"
+        fi
+        read -p "  Install VS Code, then press Enter to continue..."
+        if ! command -v code &> /dev/null; then
+            info "VS Code not detected in PATH — that's OK, continuing setup"
+        else
+            ok "VS Code found"
+        fi
+    fi
 fi
 
 # =============================================================================
-# Step 2: Workspace
+# Step 2: Install Claude Code extension
 # =============================================================================
 
-step "2/7" "Setting up workspace..."
+step "2/8" "Installing Claude Code extension..."
+
+if command -v code &> /dev/null; then
+    if code --list-extensions 2>/dev/null | grep -q "anthropics.claude-code"; then
+        ok "Claude Code extension already installed"
+    else
+        info "Installing Claude Code extension..."
+        code --install-extension anthropics.claude-code 2>/dev/null
+        ok "Claude Code extension installed"
+    fi
+else
+    info "VS Code CLI not in PATH — install the extension manually:"
+    echo -e "  ${CYAN}  https://marketplace.visualstudio.com/items?itemName=anthropics.claude-code${NC}"
+fi
+
+# =============================================================================
+# Step 3: Workspace
+# =============================================================================
+
+step "3/8" "Setting up workspace..."
 
 DEFAULT_WORKSPACE="$HOME/Projects"
 
@@ -150,10 +244,10 @@ else
 fi
 
 # =============================================================================
-# Step 3: GitHub token
+# Step 4: GitHub token
 # =============================================================================
 
-step "3/7" "Setting up secrets..."
+step "4/8" "Setting up secrets..."
 
 CLAUDE_DIR="$HOME/.claude"
 mkdir -p "$CLAUDE_DIR"
@@ -197,10 +291,10 @@ if [ "$HAS_TOKEN" = false ]; then
 fi
 
 # =============================================================================
-# Step 4: MCP Servers
+# Step 5: MCP Servers
 # =============================================================================
 
-step "4/7" "Setting up MCP servers..."
+step "5/8" "Setting up MCP servers..."
 
 MCP_FILE="$CLAUDE_DIR/.mcp.json"
 if [ ! -f "$MCP_FILE" ]; then
@@ -234,10 +328,10 @@ else
 fi
 
 # =============================================================================
-# Step 5: Skills
+# Step 6: Skills
 # =============================================================================
 
-step "5/7" "Installing skills..."
+step "6/8" "Installing skills..."
 
 SKILLS_DIR="$CLAUDE_DIR/skills"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -267,10 +361,10 @@ else
 fi
 
 # =============================================================================
-# Step 6: Plugins
+# Step 7: Plugins
 # =============================================================================
 
-step "6/7" "Installing plugins..."
+step "7/8" "Installing plugins..."
 
 if command -v claude &> /dev/null; then
     info "Installing plugin marketplace..."
@@ -283,19 +377,14 @@ if command -v claude &> /dev/null; then
     done
 else
     info "Claude CLI not found — skipping plugin install."
-    info "After installing Claude Code, paste these in the chat:"
-    echo ""
-    echo -e "  ${GRAY}  claude plugin marketplace add anthropics/claude-plugins-official${NC}"
-    echo -e "  ${GRAY}  claude plugin install typescript-lsp${NC}"
-    echo -e "  ${GRAY}  claude plugin install code-review${NC}"
-    echo -e "  ${GRAY}  claude plugin install frontend-design${NC}"
+    info "After signing into Claude Code, ask Claude to install them for you."
 fi
 
 # =============================================================================
-# Step 7: VS Code bypass mode
+# Step 8: VS Code bypass mode
 # =============================================================================
 
-step "7/7" "Enabling bypass mode..."
+step "8/8" "Enabling bypass mode..."
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     VSCODE_SETTINGS_DIR="$HOME/Library/Application Support/Code/User"
@@ -308,7 +397,6 @@ if [ -f "$VSCODE_SETTINGS_FILE" ]; then
     if grep -q "allowDangerouslySkipPermissions" "$VSCODE_SETTINGS_FILE"; then
         ok "Bypass mode already configured"
     else
-        # Use python/node to safely merge JSON, fallback to manual
         if command -v node &> /dev/null; then
             node -e "
 const fs = require('fs');
@@ -341,6 +429,8 @@ echo -e "  ${GREEN}  Setup Complete!${NC}"
 echo -e "  ${GREEN}============================================${NC}"
 echo ""
 echo -e "  What was set up:"
+echo -e "  ${GREEN}  [OK] VS Code + Node.js + Git${NC}"
+echo -e "  ${GREEN}  [OK] Claude Code extension${NC}"
 echo -e "  ${GREEN}  [OK] Workspace at $WORKSPACE${NC}"
 echo -e "  ${GREEN}  [OK] CLAUDE.md (global instructions)${NC}"
 echo -e "  ${GREEN}  [OK] MCP servers (browser, docs, GitHub)${NC}"
@@ -349,11 +439,9 @@ echo -e "  ${GREEN}  [OK] Bypass mode (Claude works without asking permission)${
 echo ""
 echo -e "  Next steps:"
 echo -e "  ${YELLOW}  1. Open VS Code${NC}"
-echo -e "  ${YELLOW}  2. Install the Claude Code extension:${NC}"
-echo -e "  ${CYAN}     https://marketplace.visualstudio.com/items?itemName=anthropics.claude-code${NC}"
-echo -e "  ${YELLOW}  3. Open your workspace folder: $WORKSPACE${NC}"
-echo -e "  ${YELLOW}  4. Click the Claude icon in the sidebar and sign in${NC}"
-echo -e "  ${YELLOW}  5. Start chatting!${NC}"
+echo -e "  ${YELLOW}  2. Open your workspace folder: $WORKSPACE${NC}"
+echo -e "  ${YELLOW}  3. Click the Claude icon in the sidebar and sign in${NC}"
+echo -e "  ${YELLOW}  4. Start chatting!${NC}"
 echo ""
 echo -e "  Try saying:"
 echo -e "  ${GRAY}  \"Help me create a new Next.js project\"${NC}"
