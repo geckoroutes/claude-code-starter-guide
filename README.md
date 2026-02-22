@@ -37,9 +37,14 @@ By default, Claude asks your permission before editing files or running commands
 
 If you trust Claude and don't want to approve every action, turn on bypass mode. This is the closest to a "just do it" ChatGPT experience.
 
-**Easiest way:** click the **gear icon** (settings wheel) in the Claude Code panel and change the permission mode to **Bypass**.
+**Easiest way (VS Code):**
+1. Open VS Code Settings: **Ctrl+,** (Windows/Linux) or **Cmd+,** (Mac)
+2. Search for `claude`
+3. Check **"Claude Code: Allow Dangerously Skip Permissions"**
 
-**Or edit the config file:** open `~/.claude/settings.json` and add:
+That's it — Claude will now work without asking permission.
+
+**Alternative — edit the config file:** open `~/.claude/settings.json` and add:
 ```json
 {
   "permissions": {
@@ -48,7 +53,7 @@ If you trust Claude and don't want to approve every action, turn on bypass mode.
 }
 ```
 
-**Or for a single session:** start Claude Code from a terminal with:
+**Alternative — single session only:** start Claude Code from a terminal with:
 ```
 claude --dangerously-skip-permissions
 ```
