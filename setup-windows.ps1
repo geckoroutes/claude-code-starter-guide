@@ -217,7 +217,7 @@ if (-not (Test-Path $claudeMd)) {
 
 ## Working Style
 
-- When I ask you to research or analyze something, use the browser (browsermcp) to look things up — don't rely only on your training data
+- When I ask you to research or analyze something, use the browser (chrome-devtools) to look things up — don't rely only on your training data
 - When I share an idea, think like a business partner: consider the market, competitors, feasibility, and user needs — not just the technical implementation
 - When I drop an existing project folder into the workspace, scan the code and create a CLAUDE.md for it automatically — figure out the stack, key commands, and structure
 - When planning, be thorough — explore every angle before proposing a plan. When executing, be efficient — don't second-guess, just build
@@ -315,9 +315,9 @@ $mcpFile = Join-Path $claudeDir ".mcp.json"
 $mcpConfig = @'
 {
   "mcpServers": {
-    "browsermcp": {
-      "command": "cmd",
-      "args": ["/c", "npx", "@browsermcp/mcp@latest"]
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest"]
     },
     "context7": {
       "command": "npx",
@@ -337,7 +337,7 @@ $mcpConfig = @'
 if (-not (Test-Path $mcpFile)) {
     Set-Content -Path $mcpFile -Value $mcpConfig -Encoding UTF8
     Write-Success "MCP servers configured:"
-    Write-Host "    - browsermcp (browser control)" -ForegroundColor Gray
+    Write-Host "    - chrome-devtools (browser control + debugging)" -ForegroundColor Gray
     Write-Host "    - context7 (live docs)" -ForegroundColor Gray
     Write-Host "    - github (PR/issue management)" -ForegroundColor Gray
 } else {

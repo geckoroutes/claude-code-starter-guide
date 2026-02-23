@@ -128,7 +128,7 @@ That's it. You're set up.
 
 These let Claude interact with the outside world during your conversation:
 
-- **browsermcp** — Claude can control your Chrome browser — click buttons, fill forms, take screenshots, navigate pages
+- **chrome-devtools** — Claude can control and debug your Chrome browser — click buttons, fill forms, take screenshots, navigate pages, inspect network requests, read console logs, and run performance traces
 - **context7** — Claude gets up-to-date documentation for popular libraries (React, Next.js, Tailwind, etc.) instead of relying on training data
 - **github** — Claude can create pull requests, manage issues, and review code on GitHub
 

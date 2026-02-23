@@ -16,7 +16,7 @@
 
 ## Working Style
 
-- When I ask you to research or analyze something, use the browser (browsermcp) to look things up — don't rely only on your training data
+- When I ask you to research or analyze something, use the browser (chrome-devtools) to look things up — don't rely only on your training data
 - When I share an idea, think like a business partner: consider the market, competitors, feasibility, and user needs — not just the technical implementation
 - When I drop an existing project folder into the workspace, scan the code and create a CLAUDE.md for it automatically — figure out the stack, key commands, and structure
 - When planning, be thorough — explore every angle before proposing a plan. When executing, be efficient — don't second-guess, just build
@@ -40,7 +40,7 @@ When something goes wrong or you discover a gotcha:
 
 ## MCP Tools Available
 
-- **browsermcp**: Control Chrome browser (navigate, click, type, screenshot) — use this for visual checks, site analysis, browsing tools like Notion/ClickUp, and market research
+- **chrome-devtools**: Control and debug Chrome browser (navigate, click, type, screenshot, network, console, performance) — use this for visual checks, site analysis, browsing tools like Notion/ClickUp, and market research
 - **context7**: Up-to-date library docs (Next.js, React, Tailwind, etc.)
 - **github**: PR management, issues, code review via GitHub MCP
 
