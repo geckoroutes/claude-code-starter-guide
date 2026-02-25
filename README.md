@@ -92,9 +92,9 @@ This script installs everything automatically — VS Code, Node.js, Git, the Cla
 - Creates your workspace folder (default: `~/Projects`)
 - Creates a `CLAUDE.md` file — Claude reads this every session to know your preferences
 - Connects your GitHub account (walks you through creating a token so Claude can manage your repos)
-- Sets up 3 MCP servers (browser control, live docs, GitHub integration)
+- Sets up 4 MCP servers (browser control, browser debugging, live docs, GitHub integration)
 - Installs 5 skills (deploy workflow, design principles, marketing copy, psychology, security)
-- Installs 3 plugins (TypeScript intelligence, code review, UI design)
+- Installs 4 plugins (TypeScript intelligence, code review, UI design, superpowers workflows)
 - Enables bypass mode (Claude works without asking permission)
 
 Nothing is sent anywhere. Everything stays on your machine.
@@ -128,15 +128,27 @@ That's it. You're set up.
 
 These let Claude interact with the outside world during your conversation:
 
-- **chrome-devtools** — Claude can control and debug your Chrome browser — click buttons, fill forms, take screenshots, navigate pages, inspect network requests, read console logs, and run performance traces
+- **chrome-devtools** — Claude can debug Chrome — inspect network requests, read console logs, run performance traces, take screenshots. Launches a fresh browser (no auth state).
+- **browsermcp** — Claude can browse your real Chrome — preserves your logins, cookies, and extensions. Uses accessibility snapshots (token-efficient, no screenshots needed).
 - **context7** — Claude gets up-to-date documentation for popular libraries (React, Next.js, Tailwind, etc.) instead of relying on training data
 - **github** — Claude can create pull requests, manage issues, and review code on GitHub
+
+**MCP priority:** BrowserMCP first (real browser, your sessions). Chrome DevTools second (debugging power, clean state).
 
 ### Plugins (Claude's tools)
 
 - **typescript-lsp** — gives Claude IDE-like intelligence — go-to-definition, find references, real error diagnostics
 - **code-review** — automated code review that checks security, performance, and readability
 - **frontend-design** — helps Claude generate better UI with design system awareness
+- **superpowers** — structured workflows including:
+  - brainstorming — use before any creative/feature work
+  - test-driven-development — write tests before implementation
+  - systematic-debugging — scientific method for bugs
+  - subagent-driven-development — parallel independent tasks
+  - writing-plans / executing-plans — design and execute implementation plans
+  - verification-before-completion — evidence before success claims
+  - code-review workflows — requesting and receiving reviews
+  - dispatching-parallel-agents — 2+ independent tasks in parallel
 
 ### Skills (Claude's knowledge)
 
