@@ -53,7 +53,7 @@ Write-Host ""
 # Step 1: Install prerequisites
 # =============================================================================
 
-Write-Step "1/8" "Installing prerequisites..."
+Write-Step "1/9" "Installing prerequisites..."
 
 # Check for winget
 $hasWinget = $null -ne (Get-Command winget -ErrorAction SilentlyContinue)
@@ -148,7 +148,7 @@ if ($codePath) {
 # Step 2: Install Claude Code extension
 # =============================================================================
 
-Write-Step "2/8" "Installing Claude Code extension..."
+Write-Step "2/9" "Installing Claude Code extension..."
 
 $codePath = Get-Command code -ErrorAction SilentlyContinue
 if ($codePath) {
@@ -169,7 +169,7 @@ if ($codePath) {
 # Step 3: Workspace
 # =============================================================================
 
-Write-Step "3/8" "Setting up workspace..."
+Write-Step "3/9" "Setting up workspace..."
 
 $defaultWorkspace = Join-Path $env:USERPROFILE "Projects"
 
@@ -211,6 +211,8 @@ if (-not (Test-Path $claudeMd)) {
 - Before creating new utilities, components, or scripts, check what already exists in the project — reuse and extend over reinvent
 - Prefer subagents (Task tool) for independent tasks during implementation — keeps the main context clean and reduces compaction risk
 - When context is getting long (~60%), proactively pause: save progress to todo list and plan files, then offer a ready-to-paste continuation prompt for a fresh session. Don't wait for compaction to degrade quality.
+- **Auto-launch fresh sessions**: After plan approval or /switch, write ``~/.claude/execute-plan.bat`` so the Stop hook auto-launches a fresh CLI session. Format: ``@echo off`` + ``cd /d <project-path>`` + ``claude "<prompt>"`` + ``del "%~f0"``. Context-heavy work deserves a clean slate.
+- **Handoff files must be COMPLETE, never summarized.** Include verbatim: every todo item, full plan content, exact file paths, line numbers, code snippets, root causes. The new session has zero prior context.
 
 ## How I Work
 
@@ -270,7 +272,7 @@ When something goes wrong or you discover a gotcha:
 # Step 4: GitHub token
 # =============================================================================
 
-Write-Step "4/8" "Setting up secrets..."
+Write-Step "4/9" "Setting up secrets..."
 
 $claudeDir = Join-Path $env:USERPROFILE ".claude"
 if (-not (Test-Path $claudeDir)) {
@@ -324,7 +326,7 @@ if (-not $hasToken) {
 # Step 5: MCP Servers
 # =============================================================================
 
-Write-Step "5/8" "Setting up MCP servers..."
+Write-Step "5/9" "Setting up MCP servers..."
 
 $mcpFile = Join-Path $claudeDir ".mcp.json"
 $mcpConfig = @'
@@ -368,7 +370,7 @@ if (-not (Test-Path $mcpFile)) {
 # Step 6: Skills
 # =============================================================================
 
-Write-Step "6/8" "Installing skills..."
+Write-Step "6/9" "Installing skills..."
 
 $skillsDir = Join-Path $claudeDir "skills"
 
@@ -420,7 +422,7 @@ if (-not (Test-Path $deployFile)) {
 # Step 7: Plugins
 # =============================================================================
 
-Write-Step "7/8" "Installing plugins..."
+Write-Step "7/9" "Installing plugins..."
 
 $claudeCmd = Get-Command claude -ErrorAction SilentlyContinue
 if ($claudeCmd) {
@@ -463,7 +465,7 @@ if ($claudeCmd) {
 # Step 8: VS Code bypass mode
 # =============================================================================
 
-Write-Step "8/8" "Enabling bypass mode..."
+Write-Step "8/9" "Enabling bypass mode..."
 
 $vscodeSettingsDir = Join-Path $env:APPDATA "Code\User"
 $vscodeSettingsFile = Join-Path $vscodeSettingsDir "settings.json"
@@ -498,6 +500,105 @@ if (Test-Path $vscodeSettingsFile) {
 }
 
 # =============================================================================
+# Step 9: Fresh session workflow hook
+# =============================================================================
+
+Write-Step "9/9" "Installing fresh session workflow..."
+
+$hooksDir = Join-Path $claudeDir "hooks"
+if (-not (Test-Path $hooksDir)) {
+    New-Item -ItemType Directory -Path $hooksDir -Force | Out-Null
+}
+
+# Copy hook script from repo
+$hookSource = Join-Path $scriptDir "templates" "hooks" "auto-execute-plan.sh"
+$hookDest = Join-Path $hooksDir "auto-execute-plan.sh"
+if (Test-Path $hookSource) {
+    Copy-Item -Path $hookSource -Destination $hookDest -Force
+    Write-Success "Hook script installed"
+} else {
+    # Create inline if repo template not found
+    $hookContent = @'
+#!/bin/bash
+BAT_FILE="$HOME/.claude/execute-plan.bat"
+if [ -f "$BAT_FILE" ]; then
+  TEMP="$HOME/.claude/_running-plan.bat"
+  mv "$BAT_FILE" "$TEMP"
+  TEMP_WIN=$(cygpath -w "$TEMP" 2>/dev/null || echo "$TEMP")
+  cmd.exe /c start "Plan Execution" "$TEMP_WIN" &
+  exit 0
+fi
+SH_FILE="$HOME/.claude/execute-plan.sh"
+if [ -f "$SH_FILE" ]; then
+  TEMP="$HOME/.claude/_running-plan.sh"
+  mv "$SH_FILE" "$TEMP"
+  chmod +x "$TEMP"
+  nohup bash -c "bash '$TEMP'; rm -f '$TEMP'" > /dev/null 2>&1 &
+  exit 0
+fi
+'@
+    Set-Content -Path $hookDest -Value $hookContent -Encoding UTF8
+    Write-Success "Hook script created"
+}
+
+# Register hook in settings.json
+$settingsFile = Join-Path $claudeDir "settings.json"
+if (Test-Path $settingsFile) {
+    $settingsContent = Get-Content $settingsFile -Raw
+    if ($settingsContent -match "auto-execute-plan") {
+        Write-Success "Hook already registered in settings.json"
+    } else {
+        # Add hook to existing settings using Node.js
+        if (Get-Command node -ErrorAction SilentlyContinue) {
+            $hookPath = ($hookDest -replace '\\', '/') -replace 'C:', '/c'
+            node -e "
+const fs = require('fs');
+const f = process.argv[1];
+const s = JSON.parse(fs.readFileSync(f, 'utf8'));
+if (!s.hooks) s.hooks = {};
+if (!s.hooks.Stop) s.hooks.Stop = [{ hooks: [] }];
+if (!s.hooks.Stop[0].hooks) s.hooks.Stop[0] = { hooks: s.hooks.Stop[0].hooks || [] };
+s.hooks.Stop[0].hooks.push({ type: 'command', command: 'bash \`"$hookPath\`"', timeout: 10 });
+fs.writeFileSync(f, JSON.stringify(s, null, 2));
+" "$settingsFile" 2>$null
+            Write-Success "Hook registered in settings.json"
+        } else {
+            Write-Info "Could not register hook — add manually to ~/.claude/settings.json"
+        }
+    }
+} else {
+    # Create settings.json with the hook
+    $hookPathForJson = ($hookDest -replace '\\', '/')
+    $settingsJson = @"
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$hookPathForJson\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
+"@
+    Set-Content -Path $settingsFile -Value $settingsJson -Encoding UTF8
+    Write-Success "Created settings.json with hook"
+}
+
+# Create handoffs directory
+$handoffsDir = Join-Path $claudeDir "handoffs"
+if (-not (Test-Path $handoffsDir)) {
+    New-Item -ItemType Directory -Path $handoffsDir -Force | Out-Null
+}
+Write-Success "Fresh session workflow ready"
+Write-Host "    After plan mode, Claude auto-launches a new session with fresh context" -ForegroundColor Gray
+
+# =============================================================================
 # Done!
 # =============================================================================
 
@@ -515,6 +616,7 @@ Write-Host "    [OK] CLAUDE.md (global instructions)" -ForegroundColor Green
 Write-Host "    [OK] MCP servers (browser, docs, GitHub)" -ForegroundColor Green
 Write-Host "    [OK] Skills (design, psychology, marketing, security, deploy)" -ForegroundColor Green
 Write-Host "    [OK] Bypass mode (Claude works without asking permission)" -ForegroundColor Green
+Write-Host "    [OK] Fresh session workflow (auto-launches after plans)" -ForegroundColor Green
 Write-Host ""
 Write-Host "  Next steps:" -ForegroundColor White
 Write-Host "    1. Open VS Code" -ForegroundColor Yellow

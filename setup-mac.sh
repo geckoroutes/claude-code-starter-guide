@@ -44,7 +44,7 @@ echo ""
 # Step 1: Install prerequisites
 # =============================================================================
 
-step "1/8" "Installing prerequisites..."
+step "1/9" "Installing prerequisites..."
 
 # Detect package manager
 HAS_BREW=false
@@ -162,7 +162,7 @@ fi
 # Step 2: Install Claude Code extension
 # =============================================================================
 
-step "2/8" "Installing Claude Code extension..."
+step "2/9" "Installing Claude Code extension..."
 
 if command -v code &> /dev/null; then
     if code --list-extensions 2>/dev/null | grep -q "anthropics.claude-code"; then
@@ -181,7 +181,7 @@ fi
 # Step 3: Workspace
 # =============================================================================
 
-step "3/8" "Setting up workspace..."
+step "3/9" "Setting up workspace..."
 
 DEFAULT_WORKSPACE="$HOME/Projects"
 
@@ -212,6 +212,8 @@ if [ ! -f "$CLAUDE_MD" ]; then
 - Before creating new utilities, components, or scripts, check what already exists in the project — reuse and extend over reinvent
 - Prefer subagents (Task tool) for independent tasks during implementation — keeps the main context clean and reduces compaction risk
 - When context is getting long (~60%), proactively pause: save progress to todo list and plan files, then offer a ready-to-paste continuation prompt for a fresh session. Don't wait for compaction to degrade quality.
+- **Auto-launch fresh sessions**: After plan approval or /switch, write \`~/.claude/execute-plan.sh\` so the Stop hook auto-launches a fresh CLI session. Context-heavy work deserves a clean slate.
+- **Handoff files must be COMPLETE, never summarized.** Include verbatim: every todo item, full plan content, exact file paths, line numbers, code snippets, root causes. The new session has zero prior context.
 
 ## How I Work
 
@@ -270,7 +272,7 @@ fi
 # Step 4: GitHub token
 # =============================================================================
 
-step "4/8" "Setting up secrets..."
+step "4/9" "Setting up secrets..."
 
 CLAUDE_DIR="$HOME/.claude"
 mkdir -p "$CLAUDE_DIR"
@@ -317,7 +319,7 @@ fi
 # Step 5: MCP Servers
 # =============================================================================
 
-step "5/8" "Setting up MCP servers..."
+step "5/9" "Setting up MCP servers..."
 
 MCP_FILE="$CLAUDE_DIR/.mcp.json"
 if [ ! -f "$MCP_FILE" ]; then
@@ -359,7 +361,7 @@ fi
 # Step 6: Skills
 # =============================================================================
 
-step "6/8" "Installing skills..."
+step "6/9" "Installing skills..."
 
 SKILLS_DIR="$CLAUDE_DIR/skills"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -392,7 +394,7 @@ fi
 # Step 7: Plugins
 # =============================================================================
 
-step "7/8" "Installing plugins..."
+step "7/9" "Installing plugins..."
 
 if command -v claude &> /dev/null; then
     info "Installing plugin marketplaces..."
@@ -414,7 +416,7 @@ fi
 # Step 8: VS Code bypass mode
 # =============================================================================
 
-step "8/8" "Enabling bypass mode..."
+step "8/9" "Enabling bypass mode..."
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     VSCODE_SETTINGS_DIR="$HOME/Library/Application Support/Code/User"
@@ -449,6 +451,100 @@ else
 fi
 
 # =============================================================================
+# Step 9: Fresh session workflow hook
+# =============================================================================
+
+step "9/9" "Installing fresh session workflow..."
+
+HOOKS_DIR="$CLAUDE_DIR/hooks"
+mkdir -p "$HOOKS_DIR"
+
+# Copy hook script from repo
+HOOK_SOURCE="$SCRIPT_DIR/templates/hooks/auto-execute-plan.sh"
+HOOK_DEST="$HOOKS_DIR/auto-execute-plan.sh"
+if [ -f "$HOOK_SOURCE" ]; then
+    cp "$HOOK_SOURCE" "$HOOK_DEST"
+    chmod +x "$HOOK_DEST"
+    ok "Hook script installed"
+else
+    # Create inline if repo template not found
+    cat > "$HOOK_DEST" << 'HOOKEOF'
+#!/bin/bash
+BAT_FILE="$HOME/.claude/execute-plan.bat"
+if [ -f "$BAT_FILE" ]; then
+  TEMP="$HOME/.claude/_running-plan.bat"
+  mv "$BAT_FILE" "$TEMP"
+  TEMP_WIN=$(cygpath -w "$TEMP" 2>/dev/null || echo "$TEMP")
+  cmd.exe /c start "Plan Execution" "$TEMP_WIN" &
+  exit 0
+fi
+SH_FILE="$HOME/.claude/execute-plan.sh"
+if [ -f "$SH_FILE" ]; then
+  TEMP="$HOME/.claude/_running-plan.sh"
+  mv "$SH_FILE" "$TEMP"
+  chmod +x "$TEMP"
+  if command -v tmux &> /dev/null; then
+    tmux new-session -d -s plan-exec "bash '$TEMP'; rm -f '$TEMP'"
+  else
+    nohup bash -c "bash '$TEMP'; rm -f '$TEMP'" > /dev/null 2>&1 &
+  fi
+  exit 0
+fi
+HOOKEOF
+    chmod +x "$HOOK_DEST"
+    ok "Hook script created"
+fi
+
+# Register hook in settings.json
+SETTINGS_FILE="$CLAUDE_DIR/settings.json"
+if [ -f "$SETTINGS_FILE" ]; then
+    if grep -q "auto-execute-plan" "$SETTINGS_FILE" 2>/dev/null; then
+        ok "Hook already registered in settings.json"
+    else
+        if command -v node &> /dev/null; then
+            node -e "
+const fs = require('fs');
+const f = process.argv[1];
+const h = process.argv[2];
+const s = JSON.parse(fs.readFileSync(f, 'utf8'));
+if (!s.hooks) s.hooks = {};
+if (!s.hooks.Stop) s.hooks.Stop = [{ hooks: [] }];
+if (!s.hooks.Stop[0].hooks) s.hooks.Stop[0] = { hooks: [] };
+s.hooks.Stop[0].hooks.push({ type: 'command', command: 'bash \"' + h + '\"', timeout: 10 });
+fs.writeFileSync(f, JSON.stringify(s, null, 2));
+" "$SETTINGS_FILE" "$HOOK_DEST"
+            ok "Hook registered in settings.json"
+        else
+            info "Could not register hook — add manually to ~/.claude/settings.json"
+        fi
+    fi
+else
+    cat > "$SETTINGS_FILE" << SETTINGSEOF
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOOK_DEST\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
+SETTINGSEOF
+    ok "Created settings.json with hook"
+fi
+
+# Create handoffs directory
+mkdir -p "$CLAUDE_DIR/handoffs"
+ok "Fresh session workflow ready"
+echo -e "  ${GRAY}  After plan mode, Claude auto-launches a new session with fresh context${NC}"
+
+# =============================================================================
 # Done!
 # =============================================================================
 
@@ -466,6 +562,7 @@ echo -e "  ${GREEN}  [OK] CLAUDE.md (global instructions)${NC}"
 echo -e "  ${GREEN}  [OK] MCP servers (browser, docs, GitHub)${NC}"
 echo -e "  ${GREEN}  [OK] Skills (design, psychology, marketing, security, deploy)${NC}"
 echo -e "  ${GREEN}  [OK] Bypass mode (Claude works without asking permission)${NC}"
+echo -e "  ${GREEN}  [OK] Fresh session workflow (auto-launches after plans)${NC}"
 echo ""
 echo -e "  Next steps:"
 echo -e "  ${YELLOW}  1. Open VS Code${NC}"

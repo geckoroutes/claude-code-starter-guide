@@ -10,6 +10,26 @@
 - Before creating new utilities, components, or scripts, check what already exists in the project — reuse and extend over reinvent
 - Prefer subagents (Task tool) for independent tasks during implementation — keeps the main context clean and reduces compaction risk
 - When context is getting long (~60%), proactively pause: save progress to todo list and plan files, then offer a ready-to-paste continuation prompt for a fresh session. Don't wait for compaction to degrade quality.
+- **Mid-session plan detection**: When creating a todo list with 3+ items after substantial exploration/debugging (NOT at the start of a conversation), always assess context load. If there's been significant back-and-forth (multiple file reads, debugging, research), save the todos + findings to a handoff file (`~/.claude/handoffs/`) and tell the user: "Context is heavy from exploration. Saving plan + findings and launching a fresh session to execute." Then write the execute trigger file. Don't make it a discussion — just one line + auto-launch.
+- **Auto-launch fresh sessions**: After plan approval, /switch, or mid-session plan detection, ALWAYS write a trigger file so the Stop hook auto-launches a fresh CLI session. On **Windows**: write `~/.claude/execute-plan.bat`. On **Mac/Linux**: write `~/.claude/execute-plan.sh`. Format:
+  **Windows (.bat)**:
+  ```
+  @echo off
+  title <title>
+  cd /d <project-path>
+  claude "<prompt>"
+  del "%~f0"
+  ```
+  **Mac/Linux (.sh)**:
+  ```
+  #!/bin/bash
+  cd <project-path>
+  claude "<prompt>"
+  ```
+  **After plan approval** — prompt: `Execute the plan at <plan-file-path>. Read the plan first. Use parallel subagents (Agent tool) for independent tasks whenever possible. Ask before any destructive actions.`
+  **After /switch or mid-session** — prompt: `Continue my previous work. Read the handoff at <handoff-file-path>. Review every section before acting. Use parallel subagents for independent tasks.`
+  Tell the user: "A new terminal will open automatically." Context-heavy work deserves a clean slate.
+- **Handoff files must be COMPLETE, never summarized.** Include verbatim: (1) every todo item with status, (2) the full plan content if one exists, (3) all concrete findings — exact file paths, line numbers, code snippets, root causes, error messages discovered during exploration. The new session has ZERO prior context — a summary like "investigated the auth bug" is useless. Write it as if briefing someone who hasn't seen any of your work.
 
 ## How I Work
 
