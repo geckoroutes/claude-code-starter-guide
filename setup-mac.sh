@@ -212,7 +212,7 @@ if [ ! -f "$CLAUDE_MD" ]; then
 - Before creating new utilities, components, or scripts, check what already exists in the project — reuse and extend over reinvent
 - Prefer subagents (Task tool) for independent tasks during implementation — keeps the main context clean and reduces compaction risk
 - When context is getting long (~60%), proactively pause: save progress to todo list and plan files, then offer a ready-to-paste continuation prompt for a fresh session. Don't wait for compaction to degrade quality.
-- **Auto-launch fresh sessions**: After plan approval or /switch, write \`~/.claude/execute-plan.sh\` so the Stop hook auto-launches a fresh CLI session. Context-heavy work deserves a clean slate.
+- **Session handoff**: After /switch, save handoff file and copy the continuation prompt to clipboard. The user starts a fresh chat manually and pastes the prompt. No auto-launch — just clipboard + clear instructions.
 - **Handoff files must be COMPLETE, never summarized.** Include verbatim: every todo item, full plan content, exact file paths, line numbers, code snippets, root causes. The new session has zero prior context.
 
 ## How I Work
@@ -450,55 +450,34 @@ else
 fi
 
 # =============================================================================
-# Step 9: Fresh session workflow hook
+# Step 9: Task completion notification
 # =============================================================================
 
-step "9/9" "Installing fresh session workflow..."
+step "9/9" "Installing task completion notification..."
 
 HOOKS_DIR="$CLAUDE_DIR/hooks"
 mkdir -p "$HOOKS_DIR"
 
-# Copy hook script from repo
-HOOK_SOURCE="$SCRIPT_DIR/templates/hooks/auto-execute-plan.sh"
-HOOK_DEST="$HOOKS_DIR/auto-execute-plan.sh"
-if [ -f "$HOOK_SOURCE" ]; then
-    cp "$HOOK_SOURCE" "$HOOK_DEST"
-    chmod +x "$HOOK_DEST"
-    ok "Hook script installed"
-else
-    # Create inline if repo template not found
-    cat > "$HOOK_DEST" << 'HOOKEOF'
+# Create notification script (Mac uses osascript, Linux uses notify-send)
+NOTIFY_SCRIPT="$HOOKS_DIR/notify-complete.sh"
+cat > "$NOTIFY_SCRIPT" << 'NOTIFYEOF'
 #!/bin/bash
-BAT_FILE="$HOME/.claude/execute-plan.bat"
-if [ -f "$BAT_FILE" ]; then
-  TEMP="$HOME/.claude/_running-plan.bat"
-  mv "$BAT_FILE" "$TEMP"
-  TEMP_WIN=$(cygpath -w "$TEMP" 2>/dev/null || echo "$TEMP")
-  cmd.exe /c start "Plan Execution" "$TEMP_WIN" &
-  exit 0
+TITLE="${1:-Claude Code}"
+MSG="${2:-Task complete}"
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  osascript -e "display notification \"$MSG\" with title \"$TITLE\"" 2>/dev/null
+elif command -v notify-send &> /dev/null; then
+  notify-send "$TITLE" "$MSG" 2>/dev/null
 fi
-SH_FILE="$HOME/.claude/execute-plan.sh"
-if [ -f "$SH_FILE" ]; then
-  TEMP="$HOME/.claude/_running-plan.sh"
-  mv "$SH_FILE" "$TEMP"
-  chmod +x "$TEMP"
-  if command -v tmux &> /dev/null; then
-    tmux new-session -d -s plan-exec "bash '$TEMP'; rm -f '$TEMP'"
-  else
-    nohup bash -c "bash '$TEMP'; rm -f '$TEMP'" > /dev/null 2>&1 &
-  fi
-  exit 0
-fi
-HOOKEOF
-    chmod +x "$HOOK_DEST"
-    ok "Hook script created"
-fi
+NOTIFYEOF
+chmod +x "$NOTIFY_SCRIPT"
+ok "Notification script created"
 
-# Register hook in settings.json
+# Register Stop hook in settings.json
 SETTINGS_FILE="$CLAUDE_DIR/settings.json"
 if [ -f "$SETTINGS_FILE" ]; then
-    if grep -q "auto-execute-plan" "$SETTINGS_FILE" 2>/dev/null; then
-        ok "Hook already registered in settings.json"
+    if grep -q "notify-complete" "$SETTINGS_FILE" 2>/dev/null; then
+        ok "Notification hook already registered"
     else
         if command -v node &> /dev/null; then
             node -e "
@@ -511,7 +490,7 @@ if (!s.hooks.Stop) s.hooks.Stop = [{ hooks: [] }];
 if (!s.hooks.Stop[0].hooks) s.hooks.Stop[0] = { hooks: [] };
 s.hooks.Stop[0].hooks.push({ type: 'command', command: 'bash \"' + h + '\"', timeout: 10 });
 fs.writeFileSync(f, JSON.stringify(s, null, 2));
-" "$SETTINGS_FILE" "$HOOK_DEST" && ok "Hook registered in settings.json" || info "Could not register hook — add manually to ~/.claude/settings.json"
+" "$SETTINGS_FILE" "$NOTIFY_SCRIPT" && ok "Notification hook registered" || info "Could not register hook — add manually to ~/.claude/settings.json"
         else
             info "Could not register hook — add manually to ~/.claude/settings.json"
         fi
@@ -525,7 +504,7 @@ else
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$HOOK_DEST\"",
+            "command": "bash \"$NOTIFY_SCRIPT\"",
             "timeout": 10
           }
         ]
@@ -534,13 +513,12 @@ else
   }
 }
 SETTINGSEOF
-    ok "Created settings.json with hook"
+    ok "Created settings.json with notification hook"
 fi
 
 # Create handoffs directory
 mkdir -p "$CLAUDE_DIR/handoffs"
-ok "Fresh session workflow ready"
-echo -e "  ${GRAY}  After plan mode, Claude auto-launches a new session with fresh context${NC}"
+ok "Notifications ready — you'll get a notification when Claude finishes a task"
 
 # =============================================================================
 # Done!
@@ -560,7 +538,7 @@ echo -e "  ${GREEN}  [OK] CLAUDE.md (global instructions)${NC}"
 echo -e "  ${GREEN}  [OK] MCP servers (browser, docs, GitHub)${NC}"
 echo -e "  ${GREEN}  [OK] Skills (design, psychology, marketing, security, deploy)${NC}"
 echo -e "  ${GREEN}  [OK] Bypass mode (Claude works without asking permission)${NC}"
-echo -e "  ${GREEN}  [OK] Fresh session workflow (auto-launches after plans)${NC}"
+echo -e "  ${GREEN}  [OK] Task completion notifications${NC}"
 echo ""
 echo -e "  Next steps:"
 echo -e "  ${YELLOW}  1. Open VS Code${NC}"

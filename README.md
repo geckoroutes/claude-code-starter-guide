@@ -96,7 +96,7 @@ This script installs everything automatically — VS Code, Node.js, Git, the Cla
 - Installs 5 skills (deploy workflow, design principles, marketing copy, psychology, security)
 - Installs 4 plugins (TypeScript intelligence, code review, UI design, superpowers workflows)
 - Enables bypass mode (Claude works without asking permission)
-- Installs fresh session workflow hook (auto-launches new sessions after plans)
+- Installs task completion notification (toast/banner when Claude finishes)
 
 Nothing is sent anywhere. Everything stays on your machine.
 
@@ -161,20 +161,17 @@ Skills are like cheat sheets that Claude reads automatically when relevant:
 - **behavioral-psychology** — when designing features — applies habit formation and persuasion principles
 - **soc2-compliance** — when handling user data — applies security patterns and audit logging
 
-### Fresh session workflow (auto-pilot for plans)
+### Task completion notifications
 
-When Claude does heavy research or creates a plan, your context window fills up — leaving less room for quality execution. The setup script installs a **Stop hook** that solves this automatically:
+The setup script installs a **Stop hook** that shows a non-blocking notification (toast on Windows, system notification on Mac/Linux) whenever Claude finishes a response. This way you can tab away and get pinged when it's done.
 
-1. **You approve a plan** → Claude writes a trigger file (`execute-plan.bat` on Windows, `.sh` on Mac/Linux)
-2. **Claude finishes its turn** → the Stop hook detects the trigger file
-3. **A new terminal opens** → fresh `claude` CLI session with full context, reads the plan, and starts executing
+### Session handoffs (/switch)
 
-**Three triggers:**
-- **Plan mode** — after you approve a plan, auto-launches execution in a fresh session
-- **/switch** — when context is heavy, saves progress to a handoff file and launches continuation
-- **Mid-session plan** — if Claude creates a big todo list after deep exploration, it auto-detects the context load and offers to switch
+When context gets heavy from deep exploration or debugging, Claude can save everything to a handoff file and give you a continuation prompt to paste into a fresh chat:
 
-The handoff files at `~/.claude/handoffs/` contain **complete verbatim context** — every file path, line number, code snippet, and finding. The new session picks up exactly where you left off, with zero information loss.
+- **Handoff files** at `~/.claude/handoffs/` contain **complete verbatim context** — every file path, line number, code snippet, and finding
+- **The continuation prompt** gets copied to your clipboard — just paste it into a new chat
+- The new session picks up exactly where you left off, with zero information loss
 
 ### Permission modes
 
@@ -198,7 +195,7 @@ The setup script enables bypass mode by default (Claude just works). If you ever
 > I have an idea for a meal planning app that generates grocery lists based on your dietary restrictions. Do extended market research. Check if people experience this problem, if there are already apps solving this, what users complain about, market size, etc. Then come up with a business plan.
 
 4. Claude will research, analyze competitors, and draft a plan. Chat back and forth — ask it to go deeper on certain aspects, propose changes, refine the plan.
-5. Once you're happy with the plan, approve it. **A new terminal will open automatically** with a fresh Claude session that reads the plan and starts building — with full context available for quality execution.
+5. Once you're happy with the plan, approve it and Claude starts building.
 
 ### Fix a bug in an existing project
 
@@ -271,9 +268,7 @@ claude-code-starter-guide/
 │   ├── project-claude.md                  ← Per-project template
 │   ├── .mcp.json                          ← MCP server config
 │   ├── .env                               ← Secrets file (with placeholders)
-│   ├── deploy-skill.md                    ← Deploy skill template
-│   └── hooks/
-│       └── auto-execute-plan.sh           ← Fresh session auto-launch hook
+│   └── deploy-skill.md                    ← Deploy skill template
 └── skills/
     ├── design-principles/SKILL.md
     ├── behavioral-psychology/SKILL.md

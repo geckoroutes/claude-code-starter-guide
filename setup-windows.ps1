@@ -211,7 +211,7 @@ if (-not (Test-Path $claudeMd)) {
 - Before creating new utilities, components, or scripts, check what already exists in the project — reuse and extend over reinvent
 - Prefer subagents (Task tool) for independent tasks during implementation — keeps the main context clean and reduces compaction risk
 - When context is getting long (~60%), proactively pause: save progress to todo list and plan files, then offer a ready-to-paste continuation prompt for a fresh session. Don't wait for compaction to degrade quality.
-- **Auto-launch fresh sessions**: After plan approval or /switch, write ``~/.claude/execute-plan.bat`` so the Stop hook auto-launches a fresh CLI session. Format: ``@echo off`` + ``cd /d <project-path>`` + ``claude "<prompt>"`` + ``del "%~f0"``. Context-heavy work deserves a clean slate.
+- **Session handoff**: After /switch, save handoff file and copy the continuation prompt to clipboard. The user starts a fresh chat manually and pastes the prompt. No auto-launch — just clipboard + clear instructions.
 - **Handoff files must be COMPLETE, never summarized.** Include verbatim: every todo item, full plan content, exact file paths, line numbers, code snippets, root causes. The new session has zero prior context.
 
 ## How I Work
@@ -500,75 +500,57 @@ if (Test-Path $vscodeSettingsFile) {
 }
 
 # =============================================================================
-# Step 9: Fresh session workflow hook
+# Step 9: Task completion notification
 # =============================================================================
 
-Write-Step "9/9" "Installing fresh session workflow..."
+Write-Step "9/9" "Installing task completion notification..."
 
 $hooksDir = Join-Path $claudeDir "hooks"
 if (-not (Test-Path $hooksDir)) {
     New-Item -ItemType Directory -Path $hooksDir -Force | Out-Null
 }
 
-# Copy hook script from repo
-$hookSource = Join-Path $scriptDir "templates" "hooks" "auto-execute-plan.sh"
-$hookDest = Join-Path $hooksDir "auto-execute-plan.sh"
-if (Test-Path $hookSource) {
-    Copy-Item -Path $hookSource -Destination $hookDest -Force
-    Write-Success "Hook script installed"
-} else {
-    # Create inline if repo template not found
-    $hookContent = @'
-#!/bin/bash
-BAT_FILE="$HOME/.claude/execute-plan.bat"
-if [ -f "$BAT_FILE" ]; then
-  TEMP="$HOME/.claude/_running-plan.bat"
-  mv "$BAT_FILE" "$TEMP"
-  TEMP_WIN=$(cygpath -w "$TEMP" 2>/dev/null || echo "$TEMP")
-  cmd.exe /c start "Plan Execution" "$TEMP_WIN" &
-  exit 0
-fi
-SH_FILE="$HOME/.claude/execute-plan.sh"
-if [ -f "$SH_FILE" ]; then
-  TEMP="$HOME/.claude/_running-plan.sh"
-  mv "$SH_FILE" "$TEMP"
-  chmod +x "$TEMP"
-  nohup bash -c "bash '$TEMP'; rm -f '$TEMP'" > /dev/null 2>&1 &
-  exit 0
-fi
+# Create toast notification script
+$toastScript = Join-Path $hooksDir "toast-notify.ps1"
+$toastContent = @'
+param([string]$Title = "Claude Code", [string]$Message = "Task complete")
+Add-Type -AssemblyName System.Windows.Forms
+$notify = New-Object System.Windows.Forms.NotifyIcon
+$notify.Icon = [System.Drawing.SystemIcons]::Information
+$notify.Visible = $true
+$notify.ShowBalloonTip(3000, $Title, $Message, [System.Windows.Forms.ToolTipIcon]::Info)
+Start-Sleep -Milliseconds 3500
+$notify.Dispose()
 '@
-    Set-Content -Path $hookDest -Value $hookContent -Encoding UTF8
-    Write-Success "Hook script created"
-}
+Set-Content -Path $toastScript -Value $toastContent -Encoding UTF8
+Write-Success "Toast notification script created"
 
-# Register hook in settings.json
+# Register Stop hook in settings.json
 $settingsFile = Join-Path $claudeDir "settings.json"
+$toastPath = ($toastScript -replace '\\', '/')
 if (Test-Path $settingsFile) {
     $settingsContent = Get-Content $settingsFile -Raw
-    if ($settingsContent -match "auto-execute-plan") {
-        Write-Success "Hook already registered in settings.json"
+    if ($settingsContent -match "toast-notify") {
+        Write-Success "Notification hook already registered"
     } else {
-        # Add hook to existing settings using Node.js
         if (Get-Command node -ErrorAction SilentlyContinue) {
-            $hookPath = ($hookDest -replace '\\', '/') -replace 'C:', '/c'
             node -e "
 const fs = require('fs');
 const f = process.argv[1];
+const h = process.argv[2];
 const s = JSON.parse(fs.readFileSync(f, 'utf8'));
 if (!s.hooks) s.hooks = {};
 if (!s.hooks.Stop) s.hooks.Stop = [{ hooks: [] }];
-if (!s.hooks.Stop[0].hooks) s.hooks.Stop[0] = { hooks: s.hooks.Stop[0].hooks || [] };
-s.hooks.Stop[0].hooks.push({ type: 'command', command: 'bash \`"$hookPath\`"', timeout: 10 });
+if (!s.hooks.Stop[0].hooks) s.hooks.Stop[0] = { hooks: [] };
+s.hooks.Stop[0].hooks.push({ type: 'command', command: 'powershell -NoProfile -ExecutionPolicy Bypass -File \"' + h + '\"', timeout: 10 });
 fs.writeFileSync(f, JSON.stringify(s, null, 2));
-" "$settingsFile" 2>$null
-            Write-Success "Hook registered in settings.json"
+" "$settingsFile" "$toastPath" 2>$null
+            Write-Success "Notification hook registered"
         } else {
             Write-Info "Could not register hook — add manually to ~/.claude/settings.json"
         }
     }
 } else {
-    # Create settings.json with the hook
-    $hookPathForJson = ($hookDest -replace '\\', '/')
     $settingsJson = @"
 {
   "hooks": {
@@ -577,7 +559,7 @@ fs.writeFileSync(f, JSON.stringify(s, null, 2));
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$hookPathForJson\"",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"$toastPath\"",
             "timeout": 10
           }
         ]
@@ -587,7 +569,7 @@ fs.writeFileSync(f, JSON.stringify(s, null, 2));
 }
 "@
     Set-Content -Path $settingsFile -Value $settingsJson -Encoding UTF8
-    Write-Success "Created settings.json with hook"
+    Write-Success "Created settings.json with notification hook"
 }
 
 # Create handoffs directory
@@ -595,8 +577,7 @@ $handoffsDir = Join-Path $claudeDir "handoffs"
 if (-not (Test-Path $handoffsDir)) {
     New-Item -ItemType Directory -Path $handoffsDir -Force | Out-Null
 }
-Write-Success "Fresh session workflow ready"
-Write-Host "    After plan mode, Claude auto-launches a new session with fresh context" -ForegroundColor Gray
+Write-Success "Notifications ready — you'll get a toast when Claude finishes a task"
 
 # =============================================================================
 # Done!
@@ -616,7 +597,7 @@ Write-Host "    [OK] CLAUDE.md (global instructions)" -ForegroundColor Green
 Write-Host "    [OK] MCP servers (browser, docs, GitHub)" -ForegroundColor Green
 Write-Host "    [OK] Skills (design, psychology, marketing, security, deploy)" -ForegroundColor Green
 Write-Host "    [OK] Bypass mode (Claude works without asking permission)" -ForegroundColor Green
-Write-Host "    [OK] Fresh session workflow (auto-launches after plans)" -ForegroundColor Green
+Write-Host "    [OK] Task completion notifications (toast)" -ForegroundColor Green
 Write-Host ""
 Write-Host "  Next steps:" -ForegroundColor White
 Write-Host "    1. Open VS Code" -ForegroundColor Yellow
