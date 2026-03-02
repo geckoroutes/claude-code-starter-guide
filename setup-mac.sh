@@ -169,7 +169,7 @@ if command -v code &> /dev/null; then
         ok "Claude Code extension already installed"
     else
         info "Installing Claude Code extension..."
-        code --install-extension anthropics.claude-code 2>/dev/null
+        code --install-extension anthropics.claude-code 2>/dev/null || true
         ok "Claude Code extension installed"
     fi
 else
@@ -436,8 +436,7 @@ const f = '$VSCODE_SETTINGS_FILE';
 const s = JSON.parse(fs.readFileSync(f, 'utf8'));
 s['claudeCode.allowDangerouslySkipPermissions'] = true;
 fs.writeFileSync(f, JSON.stringify(s, null, 4));
-"
-            ok "Bypass mode enabled — Claude will work without asking permission"
+" && ok "Bypass mode enabled — Claude will work without asking permission" || info "Could not update settings.json — enable bypass manually in VS Code settings"
         else
             info "Could not update settings.json — enable bypass manually in VS Code settings"
         fi
@@ -512,8 +511,7 @@ if (!s.hooks.Stop) s.hooks.Stop = [{ hooks: [] }];
 if (!s.hooks.Stop[0].hooks) s.hooks.Stop[0] = { hooks: [] };
 s.hooks.Stop[0].hooks.push({ type: 'command', command: 'bash \"' + h + '\"', timeout: 10 });
 fs.writeFileSync(f, JSON.stringify(s, null, 2));
-" "$SETTINGS_FILE" "$HOOK_DEST"
-            ok "Hook registered in settings.json"
+" "$SETTINGS_FILE" "$HOOK_DEST" && ok "Hook registered in settings.json" || info "Could not register hook — add manually to ~/.claude/settings.json"
         else
             info "Could not register hook — add manually to ~/.claude/settings.json"
         fi
