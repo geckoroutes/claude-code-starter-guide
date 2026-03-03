@@ -219,6 +219,8 @@ if (-not (Test-Path $claudeMd)) {
 - My workspace is $workspace — all projects are subfolders here
 - When I mention a project, read its CLAUDE.md first
 - Always scope file searches to the relevant project subfolder
+- See ``.claude/rules/tools.md`` for MCP tools, browser automation, and plugin details
+- See ``.claude/rules/infrastructure.md`` for servers, SSH keys, and secrets
 
 ## Working Style
 
@@ -240,6 +242,45 @@ When something goes wrong or you discover a gotcha:
 | Project | Path | Stack |
 | --- | --- | --- |
 
+## Learnings
+
+<!-- Claude appends cross-project learnings here -->
+"@
+    Set-Content -Path $claudeMd -Value $template -Encoding UTF8
+    Write-Success "Created CLAUDE.md (your global instructions file)"
+
+    # Create .claude/rules/ with topic files
+    $rulesDir = Join-Path $workspace ".claude" "rules"
+    if (-not (Test-Path $rulesDir)) {
+        New-Item -ItemType Directory -Path $rulesDir -Force | Out-Null
+    }
+
+    $infraTemplate = @"
+# Infrastructure
+
+## Servers
+
+- **[server-name]**: [IP] — [what it hosts], user [username]
+
+## SSH Keys
+
+- **Local machine** ``~/.ssh/id_ed25519`` → Servers
+- **Local machine** ``~/.ssh/id_ed25519_github`` → GitHub (via ``~/.ssh/config``)
+- All repos use SSH remotes (``git@github.com:[org]/...``)
+
+## Secrets & Tokens
+
+- **Claude Code secrets** (GitHub PAT, MCP tokens) → ``~/.claude/.env`` with env var references
+- **Server secrets** → each project's ``.env`` on the server, loaded via systemd ``EnvironmentFile``
+- **Local dev secrets** → each project's ``.env.local``, git-ignored
+- Never paste tokens in chat — use ``.env`` files, then reference via ```${VAR_NAME}``
+- Never commit ``.env`` files — all are in ``.gitignore``
+"@
+    Set-Content -Path (Join-Path $rulesDir "infrastructure.md") -Value $infraTemplate -Encoding UTF8
+
+    $toolsTemplate = @"
+# Tools & Plugins
+
 ## MCP Tools Available
 
 - **chrome-devtools**: AI-driven debugging — network, console, performance traces (fresh browser, no auth state)
@@ -247,23 +288,20 @@ When something goes wrong or you discover a gotcha:
 - **context7**: Up-to-date library docs (Next.js, React, Tailwind, etc.)
 - **github**: PR management, issues, code review via GitHub MCP
 
+## Browser Automation Tools
+
+| Tool | Installed | Purpose |
+|------|-----------|---------|
+| **Chrome DevTools MCP** | ``~/.claude/.mcp.json`` | AI-driven debugging: network, console, performance traces. Launches fresh browser (no auth state) |
+| **BrowserMCP** | ``@playwright/mcp`` | AI-driven browsing on your real Chrome: preserves logins, cookies, extensions. Accessibility snapshots (token-efficient) |
+
 **MCP tool priority (during conversation):**
 1. **BrowserMCP first** — for anything that needs your real browser: checking authenticated pages, verifying UI on sites you're logged into, quick spot-checks.
 2. **Chrome DevTools MCP second** — when you need debugging power: inspecting network requests, reading console errors, running performance traces, or testing in a clean browser state.
-
-## Secrets & Tokens
-
-- **Claude Code secrets** (GitHub PAT, MCP tokens) → ``~/.claude/.env`` with env var references
-- **Local dev secrets** → each project's ``.env.local``, git-ignored
-- Never paste tokens in chat — use ``.env`` files
-- Never commit ``.env`` files — all are in ``.gitignore``
-
-## Learnings
-
-<!-- Claude appends cross-project learnings here -->
 "@
-    Set-Content -Path $claudeMd -Value $template -Encoding UTF8
-    Write-Success "Created CLAUDE.md (your global instructions file)"
+    Set-Content -Path (Join-Path $rulesDir "tools.md") -Value $toolsTemplate -Encoding UTF8
+
+    Write-Success "Created .claude/rules/ (infrastructure + tools)"
 } else {
     Write-Success "CLAUDE.md already exists — skipping"
 }
