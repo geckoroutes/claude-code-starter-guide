@@ -12,16 +12,26 @@ NC='\033[0m'
 # Patterns to block (real personal info that should never appear)
 # Add your own patterns here — one regex per line
 PATTERNS=(
-    '89\.167\.27\.130'        # agent-server IP
-    '46\.224\.29\.181'        # app-server IP
-    'agentdash\.fit'          # personal domain
-    'mantapoint\.dev'         # personal domain
-    'maco@'                   # server username in connection strings
-    'mngco'                   # local Windows username
-    'ghp_[A-Za-z0-9]{36}'    # GitHub PAT
-    'sk-[A-Za-z0-9]{48}'     # OpenAI API key
-    'sk-ant-[A-Za-z0-9-]+'   # Anthropic API key
-    'xoxb-[A-Za-z0-9-]+'     # Slack bot token
+    # Personal infrastructure
+    '89\.167\.27\.130'              # agent-server IP
+    '46\.224\.29\.181'              # app-server IP
+    'agentdash\.fit'                # personal domain
+    'mantapoint\.dev'               # personal domain
+    'maco@'                         # server username in connection strings
+    'mngco'                         # local Windows username
+    'geckoroutes@'                  # personal email
+
+    # SSH / private keys
+    'BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY'  # any private key block
+    'htpasswd'                      # server auth credentials
+
+    # API keys and tokens
+    'ghp_[A-Za-z0-9]{36}'          # GitHub PAT
+    'sk-[A-Za-z0-9]{48}'           # OpenAI API key
+    'sk-ant-[A-Za-z0-9-]+'         # Anthropic API key
+    'xoxb-[A-Za-z0-9-]+'           # Slack bot token
+    'AKIA[0-9A-Z]{16}'             # AWS access key
+    'password\s*[:=]\s*["\x27].+'  # hardcoded passwords
 )
 
 FOUND=0
