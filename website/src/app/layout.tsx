@@ -9,10 +9,10 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 
 export const metadata: Metadata = {
   title: "Claude Code Starter Guide",
-  description: "Build apps by talking to your computer. No coding required.",
+  description: "Build apps by talking to your computer — in VS Code or from the terminal. No coding required.",
   openGraph: {
     title: "Build apps by talking to your computer",
-    description: "Claude Code turns plain English into working software. No coding required.",
+    description: "Claude Code turns plain English into working software — in VS Code or from the terminal. No coding required.",
     url: "https://claude-code-starter-guide.vercel.app",
     siteName: "Claude Code Starter Guide",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Build apps by talking to your computer",
-    description: "Claude Code turns plain English into working software. No coding required.",
+    description: "Claude Code turns plain English into working software — in VS Code or from the terminal. No coding required.",
     images: ["/og-image.png"],
   },
 };

@@ -33,11 +33,13 @@ echo -e "  ${CYAN}============================================${NC}"
 echo ""
 echo -e "  This will install and set up everything you need:"
 echo -e "  ${GRAY}  - VS Code, Node.js, Git (if not installed)${NC}"
-echo -e "  ${GRAY}  - Claude Code extension${NC}"
+echo -e "  ${GRAY}  - Claude Code extension + CLI${NC}"
 echo -e "  ${GRAY}  - MCP servers (browser control, docs, GitHub)${NC}"
 echo -e "  ${GRAY}  - Plugins (code review, TypeScript, design, superpowers)${NC}"
 echo -e "  ${GRAY}  - Skills (deploy, design, marketing, security)${NC}"
 echo -e "  ${GRAY}  - Workspace structure${NC}"
+echo ""
+echo -e "  ${GRAY}  Powered by Claude Opus 4.6 / Sonnet 4.6 / Haiku 4.5${NC}"
 echo ""
 
 # =============================================================================
@@ -436,6 +438,8 @@ if command -v claude &> /dev/null; then
     claude plugin marketplace add obra/superpowers-marketplace 2>/dev/null || true
     ok "Superpowers marketplace added"
 
+    # Note: frontend-design may come from claude-code-plugins marketplace.
+    # If it fails, try: claude plugin marketplace add claude-code-plugins
     for PLUGIN in typescript-lsp code-review frontend-design superpowers; do
         info "Installing $PLUGIN..."
         claude plugin install "$PLUGIN" 2>/dev/null && ok "$PLUGIN" || info "$PLUGIN — install failed (try manually later)"

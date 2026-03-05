@@ -7,7 +7,7 @@ export const SITE = {
 
 export const HERO = {
   headline: "Build apps by talking to your computer",
-  subtitle: "Claude Code turns plain English into working software. No coding experience required.",
+  subtitle: "Claude Code turns plain English into working software — in VS Code or from the command line. No coding experience required.",
   cta: "Get started — it's free",
   ctaHref: "/setup",
 };

@@ -1,5 +1,16 @@
 # Tools & Plugins
 
+## Built-in Tools
+
+Claude Code has these tools available out of the box (no setup needed):
+
+- **WebSearch** — searches the web for current information, docs, real-time data
+- **WebFetch** — fetches and reads any URL (web pages, API docs, articles)
+- **Glob / Grep** — fast file and content search across the codebase
+- **Read / Edit / Write** — file operations with line-level precision
+- **Bash** — runs shell commands directly
+- **TodoWrite** — structured task tracking within a session
+
 ## MCP Tools Available
 
 - **chrome-devtools**: AI-driven debugging — network, console, performance traces (fresh browser, no auth state)

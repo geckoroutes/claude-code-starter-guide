@@ -42,11 +42,13 @@ Write-Host "  ============================================" -ForegroundColor Cya
 Write-Host ""
 Write-Host "  This will install and set up everything you need:" -ForegroundColor White
 Write-Host "    - VS Code, Node.js, Git (if not installed)" -ForegroundColor Gray
-Write-Host "    - Claude Code extension" -ForegroundColor Gray
+Write-Host "    - Claude Code extension + CLI" -ForegroundColor Gray
 Write-Host "    - MCP servers (browser control, docs, GitHub)" -ForegroundColor Gray
 Write-Host "    - Plugins (code review, TypeScript, design, superpowers)" -ForegroundColor Gray
 Write-Host "    - Skills (deploy, design, marketing, security)" -ForegroundColor Gray
 Write-Host "    - Workspace structure" -ForegroundColor Gray
+Write-Host ""
+Write-Host "    Powered by Claude Opus 4.6 / Sonnet 4.6 / Haiku 4.5" -ForegroundColor Gray
 Write-Host ""
 
 # =============================================================================
@@ -478,6 +480,8 @@ if ($claudeCmd) {
         Write-Info "Superpowers marketplace may already be added — continuing"
     }
 
+    # Note: frontend-design may come from claude-code-plugins marketplace.
+    # If it fails, try: claude plugin marketplace add claude-code-plugins
     $plugins = @(
         @{ Name = "typescript-lsp"; Desc = "TypeScript/JS code intelligence" },
         @{ Name = "code-review"; Desc = "Automated code review" },

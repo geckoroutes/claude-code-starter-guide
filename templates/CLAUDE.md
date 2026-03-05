@@ -3,9 +3,11 @@
 ## Preferences
 
 - Always show localhost link at end of messages when a dev server is running
+- Ask permission before logging into live sites or authenticated services
 - Write temp files to Projects/_temp/, never project roots
 - Maximize automation — do everything possible with CLI, SSH, APIs, and MCP tools before falling back to manual steps
-- When manual steps are unavoidable: give dead simple instructions with numbered steps, one action per step, and direct deep links to the exact page/setting
+- When manual steps are unavoidable: offer to do it via Chrome DevTools MCP first, and if that's not possible, give dead simple instructions with numbered steps, one action per step, and direct deep links to the exact page/setting
+- When I share a URL, always try WebFetch first to read the page content. Only fall back to MCP browser tools if WebFetch fails or visual inspection is specifically needed.
 - Work autonomously — keep going until the task is done, only ask when genuinely blocked
 - Before creating new utilities, components, or scripts, check what already exists in the project — reuse and extend over reinvent
 - Prefer subagents (Task tool) for independent tasks during implementation — keeps the main context clean and reduces compaction risk
@@ -22,13 +24,6 @@
 - See `.claude/rules/tools.md` for MCP tools, browser automation, and plugin details
 - See `.claude/rules/infrastructure.md` for servers, SSH keys, and secrets
 
-## Working Style
-
-- When I ask you to research or analyze something, use the browser (chrome-devtools or browsermcp) to look things up — don't rely only on your training data
-- When I share an idea, think like a business partner: consider the market, competitors, feasibility, and user needs — not just the technical implementation
-- When I drop an existing project folder into the workspace, scan the code and create a CLAUDE.md for it automatically — figure out the stack, key commands, and structure
-- When planning, be thorough — explore every angle before proposing a plan. When executing, be efficient — don't second-guess, just build
-
 ## Self-Learning Rule
 
 When something goes wrong or you discover a gotcha:
@@ -36,6 +31,15 @@ When something goes wrong or you discover a gotcha:
 1. Fix it and verify the fix actually works before moving on
 2. Add it to that project's CLAUDE.md under a "## Learnings" section
 3. If it's cross-project (e.g., deployment, MCP, OS quirk), add to this file under Learnings below
+
+## Deploying Any Project
+
+Use `/deploy` skill. See `~/.claude/skills/deploy/SKILL.md` for project-specific configs.
+Trigger words: ship, deploy, publish, release, bump, push to live, push to server, push live, go live.
+
+## Skills
+
+<!-- List your installed skills/slash commands here -->
 
 ## Active Projects
 
