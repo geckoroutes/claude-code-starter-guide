@@ -236,8 +236,8 @@ if (-not (Test-Path $claudeMd)) {
 When something goes wrong or you discover a gotcha:
 
 1. Fix it and verify the fix actually works before moving on
-2. Add it to that project's CLAUDE.md under a "## Learnings" section
-3. If it's cross-project, add to this file under Learnings below
+2. Write the full entry (symptom → root cause → fix) in that project's LEARNINGS.md (create it if missing), and add a one-line rule to the project CLAUDE.md "## Learnings" section
+3. If it's cross-project: full entry in a LEARNINGS.md next to this file, one-liner under Learnings below. Keep CLAUDE.md lean — it loads into every session; the archive doesn't
 
 ## Active Projects
 
@@ -556,13 +556,16 @@ if (-not (Test-Path $hooksDir)) {
 $toastScript = Join-Path $hooksDir "toast-notify.ps1"
 $toastContent = @'
 param([string]$Title = "Claude Code", [string]$Message = "Task complete")
-Add-Type -AssemblyName System.Windows.Forms
-$notify = New-Object System.Windows.Forms.NotifyIcon
-$notify.Icon = [System.Drawing.SystemIcons]::Information
-$notify.Visible = $true
-$notify.ShowBalloonTip(3000, $Title, $Message, [System.Windows.Forms.ToolTipIcon]::Info)
-Start-Sleep -Milliseconds 3500
-$notify.Dispose()
+# Show the balloon from a detached child so the Stop hook returns immediately.
+# The balloon's owning process must stay alive ~3.5s — but Stop hooks run after
+# EVERY Claude reply, so blocking here taxes every single turn.
+$balloon = "Add-Type -AssemblyName System.Windows.Forms; " +
+    "`$n = New-Object System.Windows.Forms.NotifyIcon; " +
+    "`$n.Icon = [System.Drawing.SystemIcons]::Information; " +
+    "`$n.Visible = `$true; " +
+    "`$n.ShowBalloonTip(3000, '$Title', '$Message', [System.Windows.Forms.ToolTipIcon]::Info); " +
+    "Start-Sleep -Milliseconds 3500; `$n.Dispose()"
+Start-Process -WindowStyle Hidden powershell -ArgumentList '-NoProfile', '-Command', $balloon
 '@
 Set-Content -Path $toastScript -Value $toastContent -Encoding UTF8
 Write-Success "Toast notification script created"
