@@ -13,6 +13,7 @@
 - Prefer subagents (Task tool) for independent tasks during implementation — keeps the main context clean and reduces compaction risk
 - **Context management**: When context reaches ~50%, proactively offer to summarize progress and hand off to a fresh session. Save a complete handoff file to `~/.claude/handoffs/` with all findings, todos, and a ready-to-paste continuation prompt. Copy the prompt to clipboard. Don't wait for compaction to degrade quality.
 - **Mid-session plan detection**: When creating a todo list with 3+ items after substantial exploration/debugging (NOT at the start of a conversation), always assess context load. If there's been significant back-and-forth (multiple file reads, debugging, research), save the todos + findings to a handoff file (`~/.claude/handoffs/`) and tell the user: "Context is heavy from exploration. Saving plan + findings for a fresh chat." Then copy the continuation prompt to clipboard.
+- **One chat = one subject.** If you run several chats in parallel, handoffs, reviews, status checks and plans cover ONLY the current chat's subject — built from this conversation, not from shared memory lists, other handoffs, or the newest file in a shared folder. Background-task or hook results about another subject stay out of this chat.
 - **Session handoff**: After /switch, save handoff file and copy the continuation prompt to clipboard. The user starts a fresh chat manually and pastes the prompt. No auto-launch — just clipboard + clear instructions.
 - **Handoff files must be COMPLETE, never summarized.** Include verbatim: (1) every todo item with status, (2) the full plan content if one exists, (3) all concrete findings — exact file paths, line numbers, code snippets, root causes, error messages discovered during exploration. The new session has ZERO prior context — a summary like "investigated the auth bug" is useless. Write it as if briefing someone who hasn't seen any of your work.
 
@@ -29,8 +30,8 @@
 When something goes wrong or you discover a gotcha:
 
 1. Fix it and verify the fix actually works before moving on
-2. Add it to that project's CLAUDE.md under a "## Learnings" section
-3. If it's cross-project (e.g., deployment, MCP, OS quirk), add to this file under Learnings below
+2. Write the full entry (symptom → root cause → fix) in that project's LEARNINGS.md (create it if missing), and add a one-line rule to the project CLAUDE.md "## Learnings" section
+3. If it's cross-project (e.g., deployment, MCP, OS quirk): full entry in a LEARNINGS.md next to this file, one-liner under Learnings below. Keep CLAUDE.md lean — it loads into every session; the archive doesn't
 
 ## Deploying Any Project
 

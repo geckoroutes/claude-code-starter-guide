@@ -237,8 +237,8 @@ if [ ! -f "$CLAUDE_MD" ]; then
 When something goes wrong or you discover a gotcha:
 
 1. Fix it and verify the fix actually works before moving on
-2. Add it to that project's CLAUDE.md under a "## Learnings" section
-3. If it's cross-project, add to this file under Learnings below
+2. Write the full entry (symptom → root cause → fix) in that project's LEARNINGS.md (create it if missing), and add a one-line rule to the project CLAUDE.md "## Learnings" section
+3. If it's cross-project: full entry in a LEARNINGS.md next to this file, one-liner under Learnings below. Keep CLAUDE.md lean — it loads into every session; the archive doesn't
 
 ## Active Projects
 

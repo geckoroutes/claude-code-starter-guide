@@ -22,4 +22,4 @@
 
 ## Learnings
 
-<!-- Claude appends project-specific learnings here -->
+<!-- One-line rules only (symptom + rule). Full postmortems go in LEARNINGS.md next to this file — keeps CLAUDE.md lean since it loads into every session. -->
